@@ -242,19 +242,11 @@ begin
 end;
 
 function TCnCppStructureParser.NewToken(CParser: TBCBTokenList; Layer: Integer): TCnCppToken;
-var
-  Len: Integer;
 begin
   Result := CreateCppToken;
   Result.FTokenPos := CParser.RunPosition;
 
-  Len := CParser.TokenLength;
-  Result.TokenLength := Len;
-  if Len > CN_TOKEN_MAX_SIZE then
-    Len := CN_TOKEN_MAX_SIZE;
-
-  Move(CParser.TokenAddr^, Result.FToken[0], Len);
-  Result.FToken[Len] := #0;
+  Result.FToken := TEncoding.UTF8.GetString(BytesOf(CParser.TokenAddr, CParser.TokenLength));
 
   Result.FLineNumber := CParser.RunLineNumber - 1; // 1 开始变成 0 开始
   Result.FCharIndex := CParser.RunColNumber - 1;   // 暂未做 Ansi 的 Tab 展开功能
