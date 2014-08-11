@@ -75,7 +75,6 @@ type
   private
     FTag: Integer;
     FBracketLayer: Integer;
-    function GetToken: PAnsiChar;
   protected
     FCppTokenKind: TCTokenKind;
     FCompDirectiveType: TCnCompDirectiveType;
@@ -86,7 +85,7 @@ type
     FItemLayer: Integer;
     FLineNumber: Integer;
     FMethodLayer: Integer;
-    FToken: array[0..CN_TOKEN_MAX_SIZE] of AnsiChar;
+    FToken: string;
     FTokenID: TTokenKind;
     FTokenPos: Integer;
     FIsMethodStart: Boolean;
@@ -118,7 +117,7 @@ type
     {* 所在函数的层次，最外层的函数内为 1，包括匿名函数，不在任何函数内时（最外层）为 0 }
     property BracketLayer: Integer read FBracketLayer;
     {* 所在的圆括号的层次，最外层的为 0。圆括号本身应该算高一层（暂未实现）}
-    property Token: PAnsiChar read GetToken;
+    property Token: string read FToken;
     {* 该 Token 的字符串内容 }
     property TokenID: TTokenKind read FTokenID;
     {* Token 的语法类型 }
@@ -159,8 +158,8 @@ type
     FBlockStartToken: TCnPasToken;
     FChildMethodCloseToken: TCnPasToken;
     FChildMethodStartToken: TCnPasToken;
-    FCurrentChildMethod: AnsiString;
-    FCurrentMethod: AnsiString;
+    FCurrentChildMethod: String;
+    FCurrentMethod: String;
     FKeyOnly: Boolean;
     FList: TCnList;
     FMethodCloseToken: TCnPasToken;
@@ -182,7 +181,7 @@ type
     destructor Destroy; override;
     procedure Clear;
     procedure ParseSource(ASource: PAnsiChar; AIsDpr, AKeyOnly: Boolean);
-    function FindCurrentDeclaration(LineNumber, CharIndex: Integer): AnsiString;
+    function FindCurrentDeclaration(LineNumber, CharIndex: Integer): String;
     {* 查找指定光标位置所在的声明，LineNumber 1 开始，CharIndex 0 开始，类似于 CharPos
        要求是 Ansi 的偏移量。D567 下可以用 ConvertPos 得到的 CharPos 传入}
     procedure FindCurrentBlock(LineNumber, CharIndex: Integer);
@@ -208,9 +207,9 @@ type
     {* 当前最内层块}
     property InnerBlockCloseToken: TCnPasToken read FInnerBlockCloseToken;
     {* 当前最内层块}
-    property CurrentMethod: AnsiString read FCurrentMethod;
+    property CurrentMethod: String read FCurrentMethod;
     {* 当前最外层的过程或函数名}
-    property CurrentChildMethod: AnsiString read FCurrentChildMethod;
+    property CurrentChildMethod: String read FCurrentChildMethod;
     {* 当前最内层的过程或函数名，用于有嵌套过程或函数定义的情况}
     property Source: AnsiString read FSource;
     property KeyOnly: Boolean read FKeyOnly;
@@ -556,19 +555,14 @@ var
   end;
 
   procedure NewToken;
-  var
-    Len: Integer;
   begin
     Token := CreatePasToken;
     Token.FTokenPos := Lex.TokenPos;
-    
-    Len := Lex.TokenLength;
-    if Len > CN_TOKEN_MAX_SIZE then
-      Len := CN_TOKEN_MAX_SIZE;
-    // FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
-    CopyMemory(@Token.FToken[0], Lex.TokenAddr, Len);
-    Token.FToken[Len] := #0;
 
+    Token.FToken := TEncoding.UTF8.GetString(BytesOf(Lex.TokenAddr, Lex.TokenLength));
+
+    // Token.FToken := AnsiString(Lex.Token);
+    
     Token.FLineNumber := Lex.LineNumber;
     Token.FCharIndex := CalcCharIndex();
     Token.FTokenID := Lex.TokenID;
@@ -1424,7 +1418,7 @@ var
     end;
   end;
 
-  function _GetMethodName(StartToken, CloseToken: TCnPasToken): AnsiString;
+  function _GetMethodName(StartToken, CloseToken: TCnPasToken): String;
   var
     I: Integer;
   begin
@@ -1445,7 +1439,7 @@ var
 
         if (Token.Token = '(') or (Token.Token = ':') or (Token.Token = ';') then
           Break;
-        Result := Result + AnsiTrim(Token.Token);
+        Result := Result + Trim(Token.Token);
       end;
   end;
 
@@ -1503,7 +1497,7 @@ begin
   Result := FList.IndexOf(Token);
 end;
 
-function TCnPasStructureParser.FindCurrentDeclaration(LineNumber, CharIndex: Integer): AnsiString;
+function TCnPasStructureParser.FindCurrentDeclaration(LineNumber, CharIndex: Integer): String;
 var
   Idx: Integer;
 begin
@@ -1910,7 +1904,7 @@ begin
   FItemLayer := 0;
   FLineNumber := 0;
   FMethodLayer := 0;
-  FToken[0] := #0;
+  FToken := '';
   FTokenID := TTokenKind(0);
   FTokenPos := 0;
   FIsMethodStart := False;
@@ -1918,11 +1912,6 @@ begin
   FIsBlockStart := False;
   FIsBlockClose := False;
   FTag := 0;
-end;
-
-function TCnPasToken.GetToken: PAnsiChar;
-begin
-  Result := @FToken[0];
 end;
 
 { TCnIfStatement }

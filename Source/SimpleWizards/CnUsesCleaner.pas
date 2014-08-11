@@ -970,7 +970,7 @@ var
 
   // 以下代码部分参考了 GExperts 的 GX_UsesManager 单元
   // liuxiao 加入对带点号文件名的支持
-  function GetUsesSource(List: TStrings): AnsiString;
+  function GetUsesSource(List: TStrings): string;
   var
     UsesList: TObjectList;
     Item: TPrvUsesItem;
@@ -978,6 +978,7 @@ var
     CPos, BegPos, EndPos: Integer;
     I, UnitStartPos, UnitEndPos: Integer;
     S: string;
+    AnsiStr: AnsiString;
   begin
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('GetUsesSource List: %s.', [List.Text]);
@@ -1057,9 +1058,9 @@ var
 {$ENDIF}
       if Lex.TokenID <> tkNull then
         Lex.Next;
-      SetLength(Result, Lex.TokenPos - CPos);
-      CopyMemory(Pointer(Result), Pointer(Integer(Lex.Origin) + CPos), Lex.TokenPos - CPos);
-
+      SetLength(AnsiStr, Lex.TokenPos - CPos);
+      CopyMemory(Pointer(AnsiStr), Lex.Origin + CPos, Lex.TokenPos - CPos);
+      Result := string(AnsiStr);
 {$IFDEF DEBUG}
 //    CnDebugger.LogFmt('GetUsesSource First Copy Result %s.', [Result]);
 {$ENDIF}
