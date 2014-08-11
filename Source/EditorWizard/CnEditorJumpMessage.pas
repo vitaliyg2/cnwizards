@@ -799,7 +799,7 @@ var
   CharPos: TOTACharPos;
   I: Integer;
   CurrentToken: TCnGeneralPasToken;
-  CurrentTokenName: AnsiString;
+  CurrentTokenName: string;
   CurIsPas, CurIsCpp: Boolean;
   CurrentTokenIndex, StartIdx, EndIdx: Integer;
 

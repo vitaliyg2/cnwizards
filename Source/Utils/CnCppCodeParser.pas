@@ -237,17 +237,11 @@ var
   PrevIsOperator, RunReachedZero: Boolean;
 
   procedure NewToken;
-  var
-    Len: Integer;
   begin
     Token := CreateCppToken;
     Token.FTokenPos := CParser.RunPosition;
 
-    Len := CParser.TokenLength;
-    if Len > CN_TOKEN_MAX_SIZE then
-      Len := CN_TOKEN_MAX_SIZE;
-    FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
-    CopyMemory(@Token.FToken[0], CParser.TokenAddr, Len);
+    Token.FToken := TEncoding.UTF8.GetString(BytesOf(CParser.TokenAddr, CParser.TokenLength));
 
     // Token.FToken := AnsiString(CParser.RunToken);
 
