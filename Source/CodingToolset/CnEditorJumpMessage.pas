@@ -997,7 +997,7 @@ var
   CharPos: TOTACharPos;
   I: Integer;
   CurrentToken: TCnGeneralPasToken;
-  CurrentTokenName: TCnIdeTokenString;
+  CurrentTokenName: string;
   CurIsPas, CurIsCpp: Boolean;
   CurrentTokenIndex, StartIdx, EndIdx: Integer;
 

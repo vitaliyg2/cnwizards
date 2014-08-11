@@ -79,8 +79,6 @@ type
   private
     FTag: Integer;
     FBracketLayer: Integer;
-    FTokenLength: Integer;
-    function GetToken: PAnsiChar;
     function GetEditEndCol: Integer;
   protected
     FCppTokenKind: TCTokenKind;
@@ -92,7 +90,7 @@ type
     FItemLayer: Integer;
     FLineNumber: Integer;
     FMethodLayer: Integer;
-    FToken: array[0..CN_TOKEN_MAX_SIZE] of AnsiChar;
+    FToken: string;
     FTokenID: TTokenKind;
     FTokenPos: Integer;
     FIsMethodStart: Boolean;
@@ -126,12 +124,10 @@ type
     {* 所在函数的层次，最外层的函数内为 1，包括匿名函数，不在任何函数内时（最外层）为 0}
     property BracketLayer: Integer read FBracketLayer;
     {* 所在的圆括号的层次，最外层的为 0。圆括号本身应该算高一层（暂未实现）}
-    property Token: PAnsiChar read GetToken;
+    property Token: string read FToken;
     {* 该 Token 的字符串内容 }
-    property TokenLength: Integer read FTokenLength write FTokenLength;
-    {* 该 Token 的实际字符长度，注意它可能大于 Token 数组的内容长度}
     property TokenID: TTokenKind read FTokenID;
-    {* Token 的语法类型}
+    {* Token 的语法类型 }
     property CppTokenKind: TCTokenKind read FCppTokenKind;
     {* 作为 C 的 Token 使用时的 CToken 类型}
     property TokenPos: Integer read FTokenPos;
@@ -169,8 +165,8 @@ type
     FBlockStartToken: TCnPasToken;
     FChildMethodCloseToken: TCnPasToken;
     FChildMethodStartToken: TCnPasToken;
-    FCurrentChildMethod: AnsiString;
-    FCurrentMethod: AnsiString;
+    FCurrentChildMethod: String;
+    FCurrentMethod: String;
     FKeyOnly: Boolean;
     FList: TCnList;
     FMethodCloseToken: TCnPasToken;
@@ -200,7 +196,7 @@ type
     {* 对代码进行常规解析，AKeyOnly 为 True 表示只生成关键字内容，否则还加上标识符及运算符、括号等内容}
 
     function FindCurrentDeclaration(LineNumber, CharIndex: Integer;
-      out Visibility: TTokenKind): AnsiString;
+      out Visibility: TTokenKind): String;
     {* 查找指定光标位置所在的声明，LineNumber 1 开始，CharIndex 0 开始，类似于 CharPos
        要求是 Ansi 的偏移量。D567 下可以用 ConvertPos 得到的 CharPos 传入
        Visibility 参数返回为光标所在是 private/protected/public/published 还是 none}
@@ -232,9 +228,9 @@ type
     {* 当前最内层块}
     property InnerBlockCloseToken: TCnPasToken read FInnerBlockCloseToken;
     {* 当前最内层块}
-    property CurrentMethod: AnsiString read FCurrentMethod;
+    property CurrentMethod: String read FCurrentMethod;
     {* 当前最外层的过程或函数名}
-    property CurrentChildMethod: AnsiString read FCurrentChildMethod;
+    property CurrentChildMethod: String read FCurrentChildMethod;
     {* 当前最内层的过程或函数名，用于有嵌套过程或函数定义的情况}
     property Source: AnsiString read FSource;
     property KeyOnly: Boolean read FKeyOnly;
@@ -570,19 +566,11 @@ end;
 
 function TCnPasStructureParser.NewToken(Lex: TmwPasLex; Source: PAnsiChar;
   CurrBlock, CurrMethod: TCnPasToken; CurrBracketLevel: Integer): TCnPasToken;
-var
-  Len: Integer;
 begin
   Result := CreatePasToken;
   Result.FTokenPos := Lex.TokenPos;
 
-  Len := Lex.TokenLength;
-  Result.FTokenLength := Len;
-  if Len > CN_TOKEN_MAX_SIZE then
-    Len := CN_TOKEN_MAX_SIZE;
-
-  Move(Lex.TokenAddr^, Result.FToken[0], Len);
-  Result.FToken[Len] := #0;
+  Result.FToken := Lex.Token;
 
   Result.FLineNumber := Lex.LineNumber;
   Result.FCharIndex := CalcCharIndex(Lex, Source);
@@ -1454,7 +1442,7 @@ var
     end;
   end;
 
-  function _GetMethodName(StartToken, CloseToken: TCnPasToken): AnsiString;
+  function _GetMethodName(StartToken, CloseToken: TCnPasToken): String;
   var
     I: Integer;
   begin
@@ -1475,7 +1463,7 @@ var
 
         if (Token.Token = '(') or (Token.Token = ':') or (Token.Token = ';') then
           Break;
-        Result := Result + AnsiTrim(Token.Token);
+        Result := Result + Trim(Token.Token);
       end;
   end;
 
@@ -1537,7 +1525,7 @@ begin
 end;
 
 function TCnPasStructureParser.FindCurrentDeclaration(LineNumber, CharIndex: Integer;
-  out Visibility: TTokenKind): AnsiString;
+  out Visibility: TTokenKind): String;
 var
   Idx: Integer;
 begin
@@ -2112,7 +2100,7 @@ begin
   FItemLayer := 0;
   FLineNumber := 0;
   FMethodLayer := 0;
-  FToken[0] := #0;
+  FToken := '';
   FTokenID := TTokenKind(0);
   FTokenPos := 0;
   FIsMethodStart := False;
@@ -2124,12 +2112,7 @@ end;
 
 function TCnPasToken.GetEditEndCol: Integer;
 begin
-  Result := EditCol + Integer(StrLen(Token)); // Ansi 基本符合 EditPos 所需
-end;
-
-function TCnPasToken.GetToken: PAnsiChar;
-begin
-  Result := @FToken[0];
+  Result := EditCol + Length(Token); // Ansi 基本符合 EditPos 所需
 end;
 
 { TCnIfStatement }
