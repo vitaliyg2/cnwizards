@@ -534,7 +534,7 @@ type
     procedure SourceEditorNotify(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
     procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
-    procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
+    procedure EditorKeyDown(Editor: TEditorObject; Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
     procedure ClearHighlight(Editor: TEditorObject);
     procedure PaintBracketMatch(Editor: TEditorObject;
       LineNum, LogicLineNum: Integer; AElided: Boolean);
@@ -5270,7 +5270,7 @@ begin
   FHighlightCompDirective := Value;
 end;
 
-procedure TCnSourceHighlight.EditorKeyDown(Key, ScanCode: Word;
+procedure TCnSourceHighlight.EditorKeyDown(Editor: TEditorObject; Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean);
 begin
   if (Shift = []) and ((Key = VK_LEFT) or (Key = VK_UP) or

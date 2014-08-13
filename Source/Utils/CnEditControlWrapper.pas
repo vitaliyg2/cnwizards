@@ -187,7 +187,7 @@ type
   TEditorChangeNotifier = procedure (Editor: TEditorObject; ChangeType:
     TEditorChangeTypes) of object;
   {* 编辑器变更通知 }
-  TKeyMessageNotifier = procedure (Key, ScanCode: Word; Shift: TShiftState;
+  TKeyMessageNotifier = procedure (Editor: TEditorObject; Key, ScanCode: Word; Shift: TShiftState;
     var Handled: Boolean) of object;
   {* 按键事件 }
 
@@ -2437,34 +2437,48 @@ var
   ScanCode: Word;
   Shift: TShiftState;
   List: TList;
+  EditorIndex: Integer;
 begin
-  if ((Msg.message = WM_KEYDOWN) or (Msg.message = WM_KEYUP)) and
-    IsEditControl(Screen.ActiveControl) then
+  case Msg.message of
+  WM_KEYDOWN:
+    List := FKeyDownNotifiers;
+  WM_KEYUP:
+    List := FKeyUpNotifiers;
+  else
+    Exit;
+  end;
+
+  if (List.Count = 0) or not IsEditControl(Screen.ActiveControl) then
+    Exit;
+
+  EditorIndex := IndexOfEditor(Screen.ActiveControl);
+  if (EditorIndex < 0) then
+    Exit;
+
+  Key := Msg.wParam;
+  ScanCode := (Msg.lParam and $00FF0000) shr 16;
+  Shift := KeyDataToShiftState(Msg.lParam);
+
+  // 处理输入法送回的按键
+  if Key = VK_PROCESSKEY then
   begin
-    Key := Msg.wParam;
-    ScanCode := (Msg.lParam and $00FF0000) shr 16;
-    Shift := KeyDataToShiftState(Msg.lParam);
+    Key := MapVirtualKey(ScanCode, 1);
+  end;
 
-    // 处理输入法送回的按键
-    if Key = VK_PROCESSKEY then
+  I := 0;
+  while (I < List.Count) do
+  try
+    while (I < List.Count) do
     begin
-      Key := MapVirtualKey(ScanCode, 1);
-    end;
-
-    if Msg.message = WM_KEYDOWN then
-      List := FKeyDownNotifiers
-    else
-      List := FKeyUpNotifiers;
-
-    for I := 0 to List.Count - 1 do
-    try
       with PCnWizNotifierRecord(List[I])^ do
-        TKeyMessageNotifier(Notifier)(Key, ScanCode, Shift, Handled);
-      if Handled then Break;
-    except
+        TKeyMessageNotifier(Notifier)(Editors[EditorIndex], Key, ScanCode, Shift, Handled);
+      if Handled then
+        Exit;
+      Inc(I);
+    end;
+  except
       on E: Exception do
         DoHandleException('TCnEditControlWrapper.KeyMessage[' + IntToStr(I) + ']', E);
-    end;
   end;
 end;
 

@@ -124,7 +124,7 @@ type
     function CanShowButton: Boolean;
     procedure DoEnhConfig;
     procedure UpdateFlatButtons;
-    procedure EditControlKeyDown(Key, ScanCode: Word; Shift: TShiftState;
+    procedure EditControlKeyDown(Editor: TEditorObject; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean);
     procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
   public
@@ -665,7 +665,7 @@ end;
 // ¿ì½Ý¼ü´¦Àí
 //------------------------------------------------------------------------------
 
-procedure TCnSrcEditorBlockTools.EditControlKeyDown(Key, ScanCode: Word;
+procedure TCnSrcEditorBlockTools.EditControlKeyDown(Editor: TEditorObject; Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean);
 var
   EditView: IOTAEditView;

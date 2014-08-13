@@ -44,7 +44,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, IniFiles, ToolsAPI, Menus,
   CnWizUtils, CnConsts, CnCommon, CnEditorWizard,
-  CnWizConsts, CnEditorCodeTool, CnIni, mPasLex;
+  CnWizConsts, CnEditorCodeTool, CnIni, mPasLex, CnEditControlWrapper;
 
 type
 
@@ -68,7 +68,7 @@ type
     FColumn: Integer;
     procedure CursorReturnBack;
   protected
-    procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
+    procedure EditorKeyDown(Editor: TEditorObject; Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
   public
     constructor Create(AOwner: TCnEditorToolsetWizard); override;
     destructor Destroy; override;
@@ -90,9 +90,6 @@ type
 implementation
 
 {$IFDEF CNWIZARDS_CNEDITORWIZARD}
-
-uses
-  CnEditControlWrapper;
 
 const
   CnToggleVarBookmarkID = 19;
@@ -451,7 +448,7 @@ begin
   Result := ShortCut(Word('V'), [ssCtrl, ssShift]);
 end;
 
-procedure TCnEditorToggleVar.EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState;
+procedure TCnEditorToggleVar.EditorKeyDown(Editor: TEditorObject; Key, ScanCode: Word; Shift: TShiftState;
   var Handled: Boolean);
 begin
   if FEscBack and FIsVar and (Key = VK_ESCAPE) then
