@@ -145,9 +145,9 @@ type
       var Handled: Boolean): Boolean;
     procedure ConvertToUtf8Stream(Stream: TStream);
 {$ENDIF}
-    procedure EditControlKeyDown(Key, ScanCode: Word; Shift: TShiftState;
+    procedure EditControlKeyDown(Editor: TCnEditorObject; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean);
-    procedure EditControlKeyUp(Key, ScanCode: Word; Shift: TShiftState;
+    procedure EditControlKeyUp(Editor: TCnEditorObject; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean);
     procedure ExecuteInsertCharOnIdle(Sender: TObject);
 
@@ -3417,7 +3417,7 @@ begin
   Handled := True;
 end;
 
-procedure TCnSrcEditorKey.EditControlKeyDown(Key, ScanCode: Word;
+procedure TCnSrcEditorKey.EditControlKeyDown(Editor: TCnEditorObject; Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean);
 var
   View: IOTAEditView;
@@ -3466,7 +3466,7 @@ begin
   end;
 end;
 
-procedure TCnSrcEditorKey.EditControlKeyUp(Key, ScanCode: Word; Shift: TShiftState;
+procedure TCnSrcEditorKey.EditControlKeyUp(Editor: TCnEditorObject; Key, ScanCode: Word; Shift: TShiftState;
   var Handled: Boolean);
 begin
   if Active and FAutoBracket then

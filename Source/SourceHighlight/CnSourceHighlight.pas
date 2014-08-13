@@ -628,7 +628,7 @@ type
 {$ENDIF}
 
     procedure EditorChanged(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
-    procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
+    procedure EditorKeyDown(Editor: TCnEditorObject; Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
     procedure ClearHighlight(Editor: TCnEditorObject);
 
 {$IFNDEF STAND_ALONE}
@@ -6870,7 +6870,7 @@ begin
   FHighlightCompDirective := Value;
 end;
 
-procedure TCnSourceHighlight.EditorKeyDown(Key, ScanCode: Word;
+procedure TCnSourceHighlight.EditorKeyDown(Editor: TCnEditorObject; Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean);
 begin
   if (Shift = []) and ((Key = VK_LEFT) or (Key = VK_UP) or

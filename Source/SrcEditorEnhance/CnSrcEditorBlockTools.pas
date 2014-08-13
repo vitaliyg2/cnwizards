@@ -158,7 +158,7 @@ type
     procedure DoEnhConfig;
     procedure UpdateFlatButtons;   // 更新每个编辑器窗口内的浮动按钮
     procedure ReInitShortCuts;
-    procedure EditControlKeyDown(Key, ScanCode: Word; Shift: TShiftState;
+    procedure EditControlKeyDown(Editor: TCnEditorObject; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean);
     procedure EditorChanged(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
   public
@@ -817,7 +817,7 @@ end;
 // 快捷键处理
 //------------------------------------------------------------------------------
 
-procedure TCnSrcEditorBlockTools.EditControlKeyDown(Key, ScanCode: Word;
+procedure TCnSrcEditorBlockTools.EditControlKeyDown(Editor: TCnEditorObject; Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean);
 var
   EditView: IOTAEditView;
