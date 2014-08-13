@@ -4716,9 +4716,10 @@ begin
                 begin
                   if ColorBk <> clNone then
                   begin
+                    R1 := Rect(R.Left - 1, R.Top, R.Right + 1, R.Bottom - 1);
                     Brush.Color := ColorBk;
                     Brush.Style := bsSolid;
-                    FillRect(R);
+                    FillRect(R1);
                   end;
 
                   Brush.Style := bsClear;
