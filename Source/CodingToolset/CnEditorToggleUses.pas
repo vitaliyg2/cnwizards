@@ -45,7 +45,8 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, IniFiles, ToolsAPI, Menus,
   CnWizUtils, CnConsts, CnCommon, CnEditorToolsetWizard,
-  CnWizConsts, CnEditorCodeTool, CnIni, mPasLex;
+  CnWizConsts, CnEditorCodeTool, CnIni, mPasLex,
+  CnEditControlWrapper;
 
 type
 
@@ -67,7 +68,7 @@ type
     FSkipImplementUses: Boolean;
     procedure CursorReturnBack;
   protected
-    procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
+    procedure EditorKeyDown(Editor: TEditorObject; Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
   public
     constructor Create(AOwner: TCnEditorToolsetWizard); override;
     destructor Destroy; override;
@@ -86,9 +87,6 @@ type
 implementation
 
 {$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
-
-uses
-  CnEditControlWrapper;
 
 const
   CnToggleUsesBookmarkID = 20;
@@ -369,7 +367,7 @@ begin
   Ini.WriteBool('', csSkipImplementUses, FSkipImplementUses);
 end;
 
-procedure TCnEditorToggleUses.EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState;
+procedure TCnEditorToggleUses.EditorKeyDown(Editor: TEditorObject; Key, ScanCode: Word; Shift: TShiftState;
   var Handled: Boolean);
 begin
   if (Key = VK_ESCAPE) and (FUsesPosition in [upInterface, upImplementation]) then
