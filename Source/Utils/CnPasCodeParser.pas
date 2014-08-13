@@ -554,10 +554,8 @@ var
     Token := CreatePasToken;
     Token.FTokenPos := Lex.TokenPos;
 
-    Token.FToken := TEncoding.UTF8.GetString(BytesOf(Lex.TokenAddr, Lex.TokenLength));
+    Token.FToken := Lex.Token;
 
-    // Token.FToken := AnsiString(Lex.Token);
-    
     Token.FLineNumber := Lex.LineNumber;
     Token.FCharIndex := CalcCharIndex();
     Token.FTokenID := Lex.TokenID;
