@@ -21,6 +21,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 40
       Width = 60
       Height = 13
+      Alignment = taRightJustify
       Caption = 'Foreground:'
     end
     object shpBracket: TShape
@@ -35,6 +36,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 40
       Width = 60
       Height = 13
+      Alignment = taRightJustify
       Caption = 'Background:'
     end
     object shpBracketBk: TShape
@@ -49,6 +51,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 40
       Width = 34
       Height = 13
+      Alignment = taRightJustify
       Caption = 'Frame:'
     end
     object shpBracketBd: TShape
@@ -142,6 +145,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 57
       Width = 60
       Height = 13
+      Alignment = taRightJustify
       Caption = 'Foreground:'
     end
     object shpCurTokenFg: TShape
@@ -156,6 +160,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 57
       Width = 60
       Height = 13
+      Alignment = taRightJustify
       Caption = 'Background:'
     end
     object shpCurTokenBg: TShape
@@ -170,6 +175,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 57
       Width = 34
       Height = 13
+      Alignment = taRightJustify
       Caption = 'Frame:'
     end
     object shpCurTokenBd: TShape
@@ -204,6 +210,13 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Caption = 'Identi&fier Settings'
       TabOrder = 8
       OnClick = btnCustomIdentSettingClick
+    end
+    object lblCurrentTokenDelay: TLabel
+      Left = 26
+      Top = 83
+      Width = 31
+      Height = 13
+      Caption = 'Delay:'
     end
     object chkBkHighlight: TCheckBox
       Left = 8
@@ -379,6 +392,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 416
       Width = 101
       Height = 22
+      Anchors = [akTop, akRight]
       Increment = 500
       MaxValue = 100000
       MinValue = 1000
@@ -485,6 +499,17 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Caption = 'Enable Highlight Custom Identifiers.'
       TabOrder = 9
       OnClick = UpdateControls
+    end
+    object seCurrentTokenDelay: TCnSpinEdit
+      Left = 88
+      Top = 80
+      Width = 73
+      Height = 22
+      Increment = 50
+      MaxValue = 5000
+      MinValue = 50
+      TabOrder = 18
+      Value = 500
     end
   end
   object dlgColor: TColorDialog
