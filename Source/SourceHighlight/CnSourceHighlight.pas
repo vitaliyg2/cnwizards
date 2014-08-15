@@ -695,6 +695,7 @@ type
     procedure SetFlowStatementForeground(const Value: TColor);
     procedure SetCompDirectiveBackground(const Value: TColor);
     procedure SetHighlightCompDirective(const Value: Boolean);
+    procedure SetCurrentTokenDelay(const Value: Integer);
     procedure SetBlockMatchLineNamespace(const Value: Boolean);
     procedure SetCustomIdentBackground(const Value: TColor);
     procedure SetCustomIdentForeground(const Value: TColor);
@@ -753,6 +754,7 @@ type
     property BlockMatchBackground: TColor read FBlockMatchBackground write FBlockMatchBackground;
     {* 光标下关键字配对高亮的背景色}
     property CurrentTokenHighlight: Boolean read FCurrentTokenHighlight write FCurrentTokenHighlight;
+    property CurrentTokenDelay: Integer read FCurrentTokenDelay write SetCurrentTokenDelay;
     {* 是否光标下当前标识符背景色高亮}
     property CurrentTokenForeground: TColor read FCurrentTokenForeground write FCurrentTokenForeground;
     {* 光标下当前标识符高亮的前景色}
@@ -940,6 +942,7 @@ const
   csBlockMatchBackground = 'BlockMatchBackground';
 
   csCurrentTokenHighlight = 'CurrentTokenHighlight';
+  csCurrentTokenDelay = 'CurrentTokenDelay';
   csCurrentTokenColor = 'CurrentTokenColor';
   csCurrentTokenColorBk = 'CurrentTokenColorBk';
   csCurrentTokenColorBd = 'CurrentTokenColorBd';
@@ -5870,6 +5873,7 @@ begin
     FBlockMatchHighlight := ReadBool('', csBlockMatchHighlight, True);
     FBlockMatchBackground := ReadColor('', csBlockMatchBackground, clYellow);
     FCurrentTokenHighlight := ReadBool('', csCurrentTokenHighlight, True);
+    CurrentTokenDelay := ReadInteger('', csCurrentTokenDelay, CurrentTokenDelay);
     FCurrentTokenForeground := ReadColor('', csCurrentTokenColor, csDefCurTokenColorFg);
     FCurrentTokenBackground := ReadColor('', csCurrentTokenColorBk, csDefCurTokenColorBg);
     FCurrentTokenBorderColor := ReadColor('', csCurrentTokenColorBd, csDefCurTokenColorBd);
@@ -5942,6 +5946,7 @@ begin
     WriteBool('', csBlockMatchHighlight, FBlockMatchHighlight);
     WriteColor('', csBlockMatchBackground, FBlockMatchBackground);
     WriteBool('', csCurrentTokenHighlight, FCurrentTokenHighlight);
+    WriteInteger('', csCurrentTokenDelay, FCurrentTokenDelay);
     WriteColor('', csCurrentTokenColor, FCurrentTokenForeground);
     WriteColor('', csCurrentTokenColorBk, FCurrentTokenBackground);
     WriteColor('', csCurrentTokenColorBd, FCurrentTokenBorderColor);
@@ -7311,6 +7316,12 @@ begin
     if (Info <> nil) and (Info.Control <> nil) then
       Info.Control.Invalidate;
   end;
+end;
+
+procedure TCnSourceHighlight.SetCurrentTokenDelay(const Value: Integer);
+begin
+  FCurrentTokenDelay := Value;
+  FCurrentTokenValidateTimer.Interval := Value;
 end;
 
 procedure TCnSourceHighlight.SetBlockMatchLineNamespace(const Value: Boolean);
