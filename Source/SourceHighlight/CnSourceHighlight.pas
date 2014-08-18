@@ -1612,16 +1612,13 @@ begin
     Exit;
   end;
 
-  if not IsDprOrPas(EditView.Buffer.FileName) and not IsInc(EditView.Buffer.FileName) then
+  if IsCppSourceModule(EditView.Buffer.FileName) then
   begin
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('Highlight. Not IsDprOrPas Or Inc: ' + EditView.Buffer.FileName);
-{$ENDIF}
-
     // 判断如果是 C/C++，则解析并保存各个 Tokens，供光标改变时更新 FCurTokenList
     // 如果只是光标位置变化，但高亮范围不是当前整个文件的话，仍需要重新解析，这点和 Pascal 解析器不同
-    if IsCppSourceModule(EditView.Buffer.FileName) and (Modified or (CppParser.Source = '') or
-      (FHighlight.BlockHighlightRange <> brAll)) then
+    if (Modified or (CppParser.Source = '') or
+      (FHighlight.BlockHighlightRange <> brAll))
+    then
     begin
       FIsCppSource := True;
       CaseSensitive := True;
@@ -1698,6 +1695,7 @@ begin
     end;
   end
   else  // 处理解析 Pascal 中的配对关键字
+  if IsDelphiSourceModule(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName) then
   begin
     if Modified or (PasParser.Source = '') then
     begin
@@ -1808,6 +1806,7 @@ begin
     {$ENDIF}
     end;
   end;
+  // else dfm, fmx, other form and text files
 
   try
     Control.Invalidate;
