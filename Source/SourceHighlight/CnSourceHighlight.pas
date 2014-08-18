@@ -127,6 +127,7 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms,
+  Winapi.GDIPAPI, Winapi.GDIPOBJ,
   IniFiles, Contnrs, ExtCtrls, TypInfo, Math,
   {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
@@ -4641,6 +4642,10 @@ var
 {$ENDIF}
   end;
 
+var
+  GPCanvas: TGPGraphics;
+  GPBrush: TGPBrush;
+  GBPen: TGPPen;
 begin
   if LogicLineNum < 0 then
   begin
@@ -4891,26 +4896,47 @@ begin
               // 在位置上画背景高亮的标识符
               with EditCanvas do
               begin
-                R1 := Rect(R.Left - 1, R.Top, R.Right + 1, R.Bottom - 1);
+                GPCanvas := TGPGraphics.Create(EditCanvas.Handle);
+                try
+                  R1 := Rect(R.Left - 1, R.Top, R.Right + 1, R.Bottom - 1);
 {$IFDEF BDS}
-                // BDS 下字符宽度是黑体的宽度，和 EditorGetTextRect 计算出来的不一致，
-                // 得如此弥补一下。CharSize.cx 是黑体宽度
-                if (R1.Right - R1.Left) < Length(Token.Token) * CharSize.cx then
-                  R1.Right := R1.Left + Length(Token.Token) * CharSize.cx;
+                  // BDS 下字符宽度是黑体的宽度，和 EditorGetTextRect 计算出来的不一致，
+                  // 得如此弥补一下。CharSize.cx 是黑体宽度
+                  if (R1.Right - R1.Left) < Length(Token.Token) * CharSize.cx then
+                    R1.Right := R1.Left + Length(Token.Token) * CharSize.cx;
 {$ENDIF}
-                if FCurrentTokenBackground <> clNone then
-                begin
-                  Brush.Color := FCurrentTokenBackground;
-                  Brush.Style := bsSolid;
-                  FillRect(R1);
-                end;
+                  if FCurrentTokenBackground <> clNone then
+                  begin
+                    GPBrush := TGPSolidBrush.Create(MakeColor(100,
+                      GetRValue(FCurrentTokenBackground), GetGValue(FCurrentTokenBackground),
+                      GetBValue(FCurrentTokenBackground)));
+                    try
+                      GPCanvas.FillRectangle(GPBrush, MakeRect(R1));
+                    finally
+                      FreeAndNil(GPBrush);
+                    end;
+//                    Brush.Color := FCurrentTokenBackground;
+//                    Brush.Style := bsSolid;
+//                    FillRect(R1);
+                  end;
+                  Brush.Style := bsClear;
+                  if (FCurrentTokenBorderColor <> clNone) and
+                    (FCurrentTokenBorderColor <> FCurrentTokenBackground) then
+                  begin
+                    GBPen := TGPPen.Create(MakeColor(100, GetRValue(FCurrentTokenBorderColor),
+                      GetGValue(FCurrentTokenBorderColor), GetBValue(FCurrentTokenBorderColor)));
+                    try
+                      GPCanvas.DrawRectangle(GBPen, MakeRect(R1));
+                    finally
+                      FreeAndNil(GBPen);
+                    end;
 
-                Brush.Style := bsClear;
-                if (FCurrentTokenBorderColor <> clNone) and
-                  (FCurrentTokenBorderColor <> FCurrentTokenBackground) then
-                begin
-                  Pen.Color := FCurrentTokenBorderColor;
-                  Rectangle(R1);
+//                    Pen.Color := FCurrentTokenBorderColor;
+//                    Rectangle(R1);
+                  end;
+
+                finally
+                  FreeAndNil(GPCanvas);
                 end;
 
                 Font.Color := FCurrentTokenForeground;
@@ -4919,42 +4945,18 @@ begin
                 EditPosColBaseForAttribute := CalcTokenEditColForAttribute(Token);
                 EditPos.Col := EditPosColBaseForAttribute;
                 EditPos.Line := Token.EditLine;
-                WidePaintBuf[1] := #0;
 
                 AnsiCharWidthLimit := TextWidth('a'); // 先准备一个窄字符的宽度的 1.5 倍备用
                 AnsiCharWidthLimit := AnsiCharWidthLimit + AnsiCharWidthLimit shr 1;
 
-                for J := 0 to Length(Token.Token) - 1 do
-                begin
-                  EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
-                    Element, LineFlag);
+                EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
+                  Element, LineFlag);
 
                   // 2005~2007 下 Cpp 文件的 Unicode 标识符是 atIllegal，据说 Pascal 中不会出现
                   if (Element in [atIdentifier, atAssembler {$IFDEF IDE_STRING_ANSI_UTF8} , atIllegal {$ENDIF}]) and (LineFlag = 0) then
-                  begin
-                    // 在位置上画字，颜色已先设置好
-                    {$IFDEF UNICODE}
-                    TextOut(R.Left, R.Top, string(Token.Token[J]));
-                    {$ELSE}
-                    // D2005~2007 下使用 Unicode API 来直接绘制，以避免 Ansi 转换而乱码
-                    WidePaintBuf[0] := Token.Token[J];
-                    Windows.ExtTextOutW(Handle, R.Left, R.Top, TextFlags, nil, PWideChar(@(WidePaintBuf[0])), 1, nil);
-                    {$ENDIF}
-                  end;
-
-                  // 标识符支持 Unicode，直接用 WideCharIsWideLength 的判断可能不准，需要画出宽度来衡量
-                  if WideCharIsWideLengthOnCanvas(Token.Token[J]) then
-                  begin
-                    Inc(R.Left, CharSize.cx * SizeOf(WideChar));
-                    Inc(R.Right, CharSize.cx * SizeOf(WideChar));
-                  end
-                  else
-                  begin
-                    Inc(R.Left, CharSize.cx);
-                    Inc(R.Right, CharSize.cx);
-                  end;
-
-                  Inc(EditPos.Col);
+                begin
+                  // 在位置上画字，颜色已先设置好
+                  TextOut(R.Left, R.Top, Token.Token);
                 end;
 {$ELSE}
                 // 低版本可直接绘制
