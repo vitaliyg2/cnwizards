@@ -6907,6 +6907,8 @@ procedure TCnSourceHighlight.SetCurrentTokenDelay(const Value: Integer);
 begin
   FCurrentTokenDelay := Value;
   FCurrentTokenValidateTimer.Interval := Value;
+end;
+
 procedure TCnSourceHighlight.SetBlockMatchLineNamespace(const Value: Boolean);
 begin
   FBlockMatchLineNamespace := Value;

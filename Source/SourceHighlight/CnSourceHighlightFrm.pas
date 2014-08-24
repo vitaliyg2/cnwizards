@@ -116,6 +116,8 @@ type
     chkShowLinePosAtGutter: TCheckBox;
     chkCustomIdent: TCheckBox;
     btnCustomIdentSetting: TButton;
+    seCurrentTokenDelay: TCnSpinEdit;
+    lblCurrentTokenDelay: TLabel;
     procedure UpdateControls(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure shpBracketMouseDown(Sender: TObject; Button: TMouseButton;
@@ -189,6 +191,7 @@ begin
     rgMatchRange.ItemIndex := Integer(Wizard.BlockHighlightRange);
     rgMatchDelay.ItemIndex := Integer(Wizard.BlockHighlightStyle);
     seDelay.Value := Wizard.BlockMatchDelay;
+    seCurrentTokenDelay.Value := Wizard.CurrentTokenDelay;
     chkMaxSize.Checked := Wizard.BlockMatchLineLimit;
     seMaxLines.Value := Wizard.BlockMatchMaxLines;
     hkMatchHotkey.HotKey := Wizard.BlockMatchHotkey;
@@ -234,6 +237,8 @@ begin
       Wizard.BlockHighlightRange := TBlockHighlightRange(rgMatchRange.ItemIndex);
       Wizard.BlockHighlightStyle := TBlockHighlightStyle(rgMatchDelay.ItemIndex);
       Wizard.BlockMatchDelay := seDelay.Value;
+      Wizard.CurrentTokenDelay := seCurrentTokenDelay.Value;
+
       Wizard.BlockMatchLineLimit := chkMaxSize.Checked;
       Wizard.BlockMatchMaxLines := seMaxLines.Value;
       Wizard.BlockMatchHotkey := hkMatchHotkey.HotKey;
@@ -279,6 +284,8 @@ begin
   lblCurTokenBd.Enabled := chkCurrentToken.Checked;
   shpCurTokenBd.Enabled := chkCurrentToken.Checked;
   chkShowLinePosAtGutter.Enabled := chkCurrentToken.Checked;
+  lblCurrentTokenDelay.Enabled := chkCurrentToken.Checked;
+  seCurrentTokenDelay.Enabled := chkCurrentToken.Checked;
 
   shpCurLine.Enabled := chkHighlightCurLine.Checked;
   shpFlowControl.Enabled := chkFlowControl.Checked;

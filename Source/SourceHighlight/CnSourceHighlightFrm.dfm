@@ -205,6 +205,13 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       TabOrder = 8
       OnClick = btnCustomIdentSettingClick
     end
+    object lblCurrentTokenDelay: TLabel
+      Left = 26
+      Top = 83
+      Width = 31
+      Height = 13
+      Caption = 'Delay:'
+    end
     object chkBkHighlight: TCheckBox
       Left = 8
       Top = 16
@@ -485,6 +492,17 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Caption = 'Enable Highlight Custom Identifiers.'
       TabOrder = 9
       OnClick = UpdateControls
+    end
+    object seCurrentTokenDelay: TCnSpinEdit
+      Left = 88
+      Top = 80
+      Width = 73
+      Height = 22
+      Increment = 50
+      MaxValue = 5000
+      MinValue = 50
+      TabOrder = 18
+      Value = 500
     end
   end
   object dlgColor: TColorDialog
