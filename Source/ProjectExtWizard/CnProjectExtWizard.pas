@@ -78,6 +78,7 @@ uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, ActnList,
   ToolsAPI, IniFiles, ShellAPI, Menus, FileCtrl, {$IFDEF BDS} Variants, {$ENDIF}
   {$IFDEF DelphiXE3_UP} Actions,{$ENDIF}
+  CnProjectOpenFileFrm,
   CnCommon, CnWizClasses, CnWizUtils, CnConsts, CnWizConsts, CnProjectViewUnitsFrm,
   CnProjectViewFormsFrm, CnProjectListUsedFrm, CnProjectDelTempFrm, CnIni,
   CnWizCompilerConst, CnProjectBackupFrm, CnProjectDirBuilderFrm, CnWizMethodHook,
@@ -100,6 +101,7 @@ type
     IdExploreUnit: Integer;
     IdExploreExe: Integer;
     IdViewUnits: Integer;
+    IdOpenFile: Integer;
     IdViewForms: Integer;
   {$IFDEF SUPPORT_USE_UNIT}
     IdUseUnits: Integer;
@@ -407,6 +409,10 @@ begin
     SCnProjExtViewUnitsCaption, ShortCut(Word('U'), [ssCtrl]),
     SCnProjExtViewUnitsHint, SCnProjExtViewUnits);
 
+  IdOpenFile := RegisterASubAction(SCnProjExtOpenFile,
+    SCnProjExtOpenFileCaption, ShortCut(Word('L'), [ssCtrl]),
+    SCnProjExtOpenFileHint, SCnProjExtOpenFile);
+
   IdViewForms := RegisterASubAction(SCnProjExtViewForms,
     SCnProjExtViewFormsCaption, 0,
     SCnProjExtViewFormsHint, SCnProjExtViewForms);
@@ -474,6 +480,16 @@ begin
     Ini := CreateIniFile;
     try
       ShowProjectViewUnits(Ini, UnitsListHookBtnChecked);
+      UpdateActionHook(UnitsListHookBtnChecked, FormsListHookBtnChecked, UseUnitsHookBtnChecked);
+    finally
+      Ini.Free;
+    end;
+  end
+  else if Index = IdOpenFile then
+  begin
+    Ini := CreateIniFile;
+    try
+      ShowProjectOpenFile(Ini, UnitsListHookBtnChecked);
       UpdateActionHook(UnitsListHookBtnChecked, FormsListHookBtnChecked, UseUnitsHookBtnChecked);
     finally
       Ini.Free;
@@ -653,8 +669,8 @@ begin
     AEnabled := AEnabled or TCustomAction(FUnitsListAction).Enabled;
   end;
 
-  SetVisible([IdViewUnits, IdViewForms], Active);
-  SetEnabled([IdViewUnits, IdViewForms], AEnabled);
+  SetVisible([IdViewUnits, IdViewForms, IdOpenFile], Active);
+  SetEnabled([IdViewUnits, IdViewForms, IdOpenFile], AEnabled);
 
   SubActions[IdExploreUnit].Enabled := CnOtaGetCurrentModule <> nil;
   SubActions[IdListUsed].Enabled := CnOtaGetCurrentModule <> nil;

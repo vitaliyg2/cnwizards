@@ -140,6 +140,7 @@ uses
   CnProjectViewBaseFrm in 'ProjectExtWizard\CnProjectViewBaseFrm.pas' {CnProjectViewBaseForm},
   CnProjectViewUnitsFrm in 'ProjectExtWizard\CnProjectViewUnitsFrm.pas' {CnProjectViewUnitsForm},
   CnProjectViewFormsFrm in 'ProjectExtWizard\CnProjectViewFormsFrm.pas' {CnProjectViewFormsForm},
+  CnProjectOpenFileFrm in 'ProjectExtWizard\CnProjectOpenFileFrm.pas' {CnProjectOpenFileForm},
   CnProjectUseUnitsFrm in 'ProjectExtWizard\CnProjectUseUnitsFrm.pas' {CnProjectViewUnitsForm},
   CnProjectFramesFrm in 'ProjectExtWizard\CnProjectFramesFrm.pas' {CnProjectFramesForm},
   CnProjectListUsedFrm in 'ProjectExtWizard\CnProjectListUsedFrm.pas' {CnProjectListUsedForm},
