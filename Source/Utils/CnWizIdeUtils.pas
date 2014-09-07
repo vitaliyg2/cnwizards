@@ -394,6 +394,8 @@ function CnOtaGetVersionInfoKeys(Project: IOTAProject = nil): TStrings;
 procedure GetLibraryPath(Paths: TStrings; IncludeProjectPath: Boolean = True);
 {* 取环境设置中的 LibraryPath 内容}
 
+procedure GetSearchPath(Project: IOTAProject; Paths: TStrings);
+
 function GetComponentUnitName(const ComponentName: string): string;
 {* 取组件定义所在的单元名}
 
@@ -1799,7 +1801,7 @@ end;
 procedure AddProjectPath(Project: IOTAProject; Paths: TStrings; IDStr: string);
 var
   APath: string;
-  APaths: TStrings;
+  APaths: TStringList;
   I: Integer;
 begin
   if not Assigned(Project.ProjectOptions) then
@@ -1814,32 +1816,52 @@ begin
   if APath <> '' then
   begin
     APath := ReplaceToActualPath(APath, Project);
-      
+
     // 处理路径中的相对路径
     APaths := TStringList.Create;
     try
+      APaths.Sorted := True;
+      APaths.Duplicates := dupIgnore;
+      APaths.CaseSensitive := False;
+
       APaths.Text := StringReplace(APath, ';', #13#10, [rfReplaceAll]);
-      for I := 0 to APaths.Count - 1 do
+      for i := 0 to APaths.Count - 1 do
       begin
-        if Trim(APaths[I]) <> '' then   // 无效目录
+        if Trim(APaths[i]) <> '' then   // 无效目录
         begin
-          APath := MakePath(Trim(APaths[I]));
-          if (Length(APath) > 2) and (APath[2] = ':') then // 全路径目录
-          begin
-            if Paths.IndexOf(APath) < 0 then
-              Paths.Add(APath);
-          end
-          else                          // 相对路径
+          APath := MakePath(Trim(APaths[i]));
+          if (Length(APath) < 2) or (APath[2] <> ':') then // 全路径目录
           begin
             APath := LinkPath(_CnExtractFilePath(Project.FileName), APath);
-            if Paths.IndexOf(APath) < 0 then
-              Paths.Add(APath);
           end;
-        end;          
+
+          if (APath <> '') and (Paths.IndexOf(APath) < 0) then
+            Paths.Add(APath);
+        end;
       end;
     finally
       APaths.Free;
     end;                
+  end;
+end;
+
+procedure GetSearchPath(Project: IOTAProject; Paths: TStrings);
+var
+  i: Integer;
+  Path: string;
+begin
+  AddProjectPath(Project, Paths, 'BrowsingPath');
+  AddProjectPath(Project, Paths, 'SrcDir');
+  AddProjectPath(Project, Paths, 'IncludePath');
+
+  Path := _CnExtractFilePath(Project.FileName);
+  if Paths.IndexOf(Path) < 0 then
+    Paths.Add(Path);
+  for i := 0 to Project.GetModuleCount - 1 do
+  begin
+    Path := _CnExtractFilePath(Project.GetModule(i).FileName);
+    if (Path <> '') and (Paths.IndexOf(Path) < 0) then
+      Paths.Add(Path);
   end;
 end;
 
@@ -1850,7 +1872,6 @@ var
   Project: IOTAProject;
   Path: string;
   I, J: Integer;
-  APaths: TStrings;
 begin
   Paths.Clear;
 
@@ -1862,30 +1883,25 @@ begin
   ProjectGroup := CnOtaGetProjectGroup;
   if Assigned(ProjectGroup) then
   begin
-    APaths := TStringList.Create;
-    try
-      for I := 0 to ProjectGroup.GetProjectCount - 1 do
+    for i := 0 to ProjectGroup.GetProjectCount - 1 do
+    begin
+      Project := ProjectGroup.Projects[i];
+      if Assigned(Project) then
       begin
-        Project := ProjectGroup.Projects[I];
-        if Assigned(Project) then
-        begin
-          // 增加工程搜索路径
-          AddProjectPath(Project, Paths, 'SrcDir');
-          AddProjectPath(Project, Paths, 'UnitDir');
-          AddProjectPath(Project, Paths, 'LibPath');
-          AddProjectPath(Project, Paths, 'IncludePath');
+        // 增加工程搜索路径
+        AddProjectPath(Project, Paths, 'SrcDir');
+        AddProjectPath(Project, Paths, 'UnitDir');
+        AddProjectPath(Project, Paths, 'LibPath');
+        AddProjectPath(Project, Paths, 'IncludePath');
 
-          // 增加工程中文件的路径
-          for J := 0 to Project.GetModuleCount - 1 do
-          begin
-            Path := _CnExtractFileDir(Project.GetModule(J).FileName);
-            if Paths.IndexOf(Path) < 0 then
-              Paths.Add(Path);
-          end;
+        // 增加工程中文件的路径
+        for J := 0 to Project.GetModuleCount - 1 do
+        begin
+          Path := _CnExtractFilePath(Project.GetModule(j).FileName);
+          if Paths.IndexOf(Path) < 0 then
+            Paths.Add(Path);
         end;
       end;
-    finally
-      APaths.Free;
     end;
   end;
 
