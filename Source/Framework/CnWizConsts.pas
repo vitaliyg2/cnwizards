@@ -257,6 +257,7 @@ resourcestring
   SCnProjExtExploreProject = 'CnProjExtExploreProject';
   SCnProjExtExploreExe = 'CnProjExtExploreExe';
   SCnProjExtViewUnits = 'CnProjExtViewUnits';
+  SCnProjExtOpenFile = 'CnProjExtOpenFile';
   SCnProjExtViewForms = 'CnProjExtViewForms';
   SCnProjExtUseUnits = 'CnProjExtUseUnits';
   SCnProjExtListUsed = 'CnProjExtListUsed';
@@ -1432,7 +1433,9 @@ var
   SCnProjExtExploreExeCaption: string = '&Browse Output Dir...';
   SCnProjExtExploreExeHint: string = 'Open Output Directory in Windows Explorer';
   SCnProjExtViewUnitsCaption: string = 'List &Units...';
+  SCnProjExtOpenFileCaption: string = 'Open File...';
   SCnProjExtViewUnitsHint: string = 'Display Units List in Project Group';
+  SCnProjExtOpenFileHint: string = 'Display Files in Project search path';
   SCnProjExtViewFormsCaption: string = 'List &Forms...';
   SCnProjExtViewFormsHint: string = 'Display Forms List in Project Group';
   SCnProjExtUseUnitsCaption: string = 'Use Un&it...';
@@ -1837,7 +1840,7 @@ var
   SCnUnitsDependencyMenuCaption: string = '&Units Dependency...';
   SCnUnitsDependencyName: string = 'Units Dependency';
   SCnUnitsDependencyComment: string = 'Displays dependency tree for currently open unit';
-  SCnUnitsDependencyMenuHint: string = SCnUnitsDependencyComment;
+  SCnUnitsDependencyMenuHint: string = 'Displays dependency tree for currently open unit';
   SCnUnitsDependencyCompileFail: string = 'Compile error. Unable to retrieve units dependency';
 
   // CnAICoderWizard

@@ -472,6 +472,8 @@ function GetCurrentCompilingProject: IOTAProject;
 function CompileProject(AProject: IOTAProject): Boolean;
 {* 编译工程，返回编译是否成功}
 
+procedure GetSearchPath(Project: IOTAProject; Paths: TStrings);
+
 function GetComponentUnitName(const ComponentName: string): string;
 {* 取组件定义所在的单元名}
 
@@ -2371,6 +2373,26 @@ begin
 {$ENDIF}
 end;
 {$ENDIF}
+
+procedure GetSearchPath(Project: IOTAProject; Paths: TStrings);
+var
+  i: Integer;
+  Path: string;
+begin
+  AddProjectPath(Project, Paths, pptUnit);
+  AddProjectPath(Project, Paths, pptSrc);
+  AddProjectPath(Project, Paths, pptInclude);
+
+  Path := _CnExtractFilePath(Project.FileName);
+  if Paths.IndexOf(Path) < 0 then
+    Paths.Add(Path);
+  for i := 0 to Project.GetModuleCount - 1 do
+  begin
+    Path := _CnExtractFilePath(Project.GetModule(i).FileName);
+    if (Path <> '') and (Paths.IndexOf(Path) < 0) then
+      Paths.Add(Path);
+  end;
+end;
 
 // 根据模块名获得完整文件名
 function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
