@@ -4252,29 +4252,14 @@ begin
 {$IFDEF BDS}
                   // BDS 下需要挨个绘制字符，因为 BDS 自身采用的是加粗的字符间距绘制
                   EditPosColBaseForAttribute := CalcTokenEditColForAttribute(Token);
-                  for J := 0 to Length(Token.Token) - 1 do
+                  EditPos.Col := EditPosColBaseForAttribute;
+                  EditPos.Line := Token.EditLine;
+                  EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
+                    Element, LineFlag);
+                  if (Element in [atPreproc, atComment]) and (LineFlag = 0) then
                   begin
-                    EditPos.Col := EditPosColBaseForAttribute + J;
-                    EditPos.Line := Token.EditLine;
-                    EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
-                      Element, LineFlag);
-
-                    if (Element in [atPreproc, atComment]) and (LineFlag = 0) then
-                    begin
-                      // 在位置上画字
-                      TextOut(R.Left, R.Top, string(Token.Token[J]));
-                    end;
-
-                    if WideCharIsWideLength(Token.Token[J]) then
-                    begin
-                      Inc(R.Left, CharSize.cx * SizeOf(WideChar));
-                      Inc(R.Right, CharSize.cx * SizeOf(WideChar));
-                    end
-                    else
-                    begin
-                      Inc(R.Left, CharSize.cx);
-                      Inc(R.Right, CharSize.cx);
-                    end;
+                    // 在位置上画字
+                    TextOut(R.Left, R.Top, Token.Token);
                   end;
 {$ELSE}
                   // 低版本可直接绘制
