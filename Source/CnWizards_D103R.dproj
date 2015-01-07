@@ -554,6 +554,7 @@
         <DCCReference Include="CodeFormatter\CnCodeFormatterWizard.pas">
             <Form>CnCodeFormatterForm</Form>
         </DCCReference>
+        <DCCReference Include="CodingToolset\CnEditorSortUsesList.pas"/>
         <DCCReference Include="AICoder\CnAICoderWizard.pas">
             <Form>CnAICoderConfigForm</Form>
         </DCCReference>

@@ -68,7 +68,7 @@ type
     btCopyHTML, btSaveToFile,
     btLowerCase, btUpperCase, btToggleCase,
     btIndent, btIndentEx, btUnindent, btUnindentEx,
-    btCommentCode, btUnCommentCode, btToggleComment, btCommentCropper,
+    btCommentCode, btUnCommentCode, btToggleComment, btCommentCropper, btSortUsesList,
     btAICoderExplainCode, btAICoderReviewCode, btAICoderGenTestCase, btAICoderToggleChatWindow, btAICoderSetting,
     btFormatCode, btCodeSwap, btEvalAlign, btCodeToString, btInsertColor, btInsertDateTime,
     btSortLines, btUsesFromIdent, {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD} btAddToCollector, {$ENDIF}
@@ -1006,6 +1006,7 @@ begin
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorInsertTime', btInsertDateTime);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorSortLines', btSortLines);
   AddMenuItemWithAction(FMiscMenu, 'actCnUsesToolsFromIdent', btUsesFromIdent);
+  AddMenuItemWithAction(FMiscMenu, 'actCnEditorSortUsesList', btSortUsesList);
 {$IFDEF IDE_HAS_INSIGHT}
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorJumpIDEInsight', btSearchInsight);
 {$ENDIF}
