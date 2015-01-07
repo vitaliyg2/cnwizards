@@ -65,7 +65,7 @@ type
     btCopyHTML, btSaveToFile,
     btLowerCase, btUpperCase, btToggleCase,
     btIndent, btIndentEx, btUnindent, btUnindentEx,
-    btCommentCode, btUnCommentCode, btToggleComment, btCommentCropper,
+    btCommentCode, btUnCommentCode, btToggleComment, btCommentCropper, btSortUsesList,
     btFormatCode, btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime,
     btSortLines, {$IFDEF IDE_HAS_INSIGHT} btSearchInsight, {$ENDIF}
     btBlockMoveUp, btBlockMoveDown, btBlockDelLines, btDisableHighlight,
@@ -933,6 +933,7 @@ begin
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorInsertColor', btInsertColor);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorInsertTime', btInsertDateTime);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorSortLines', btSortLines);
+  AddMenuItemWithAction(FMiscMenu, 'actCnEditorSortUsesList', btSortUsesList);
 {$IFDEF IDE_HAS_INSIGHT}
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorJumpIDEInsight', btSearchInsight);
 {$ENDIF}
