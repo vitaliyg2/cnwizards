@@ -785,6 +785,11 @@ var
   SCnEditorSortLinesMenuHint: string = 'Sort Selected Lines';
   SCnEditorSortLinesName: string = 'Sort Selected Lines Tool';
 
+  // CnEditorSortUsesList
+  SCnEditorSortUsesListMenuCaption: string = 'So&rt Selected Units';
+  SCnEditorSortUsesListMenuHint: string = 'Sort Selected Units';
+  SCnEditorSortUsesListName: string = 'Sort Selected Units Tool';
+
   // CnEditorToggleVar
   SCnEditorToggleVarMenuCaption: string = 'Toggle &Var Field';
   SCnEditorToggleVarMenuHint: string = 'Jump between Current Place and Var Field';
