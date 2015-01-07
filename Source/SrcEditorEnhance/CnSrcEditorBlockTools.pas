@@ -67,7 +67,7 @@ type
     btCopyHTML, btSaveToFile,
     btLowerCase, btUpperCase, btToggleCase,
     btIndent, btIndentEx, btUnindent, btUnindentEx,
-    btCommentCode, btUnCommentCode, btToggleComment, btCommentCropper,
+    btCommentCode, btUnCommentCode, btToggleComment, btCommentCropper, btSortUsesList,
     btFormatCode, btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime,
     btSortLines, btBlockMoveUp, btBlockMoveDown, btBlockDelLines, btShortCutConfig);
 
@@ -795,7 +795,8 @@ begin
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorInsertColor', btInsertColor);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorInsertTime', btInsertDateTime);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorSortLines', btSortLines);
-  
+  AddMenuItemWithAction(FMiscMenu, 'actCnEditorSortUsesList', btSortUsesList);
+
 {$IFDEF BDS} // Only for BDS because of bug. ;-(
   DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveUp, btBlockMoveUp, FBlockMoveUpShortCut.ShortCut);
   DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveDown, btBlockMoveDown, FBlockMoveDownShortCut.ShortCut);
