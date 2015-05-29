@@ -1833,6 +1833,13 @@ var
   SCnCodeFormatterErrPascalErrorInterface: string = 'Interface Error.';
   SCnCodeFormatterErrPascalInvalidStatement: string = 'Invalid Statement.';
 
+  // UnitsDependency
+  SCnUnitsDependencyMenuCaption: string = '&Units Dependency...';
+  SCnUnitsDependencyName: string = 'Units Dependency';
+  SCnUnitsDependencyComment: string = 'Displays dependency tree for currently open unit';
+  SCnUnitsDependencyMenuHint: string = SCnUnitsDependencyComment;
+  SCnUnitsDependencyCompileFail: string = 'Compile error. Unable to retrieve units dependency';
+
   // CnAICoderWizard
   SCnAICoderWizardName: string = 'AI Coder Wizard';
   SCnAICoderWizardComment: string = 'AI Assistant for Coding';
