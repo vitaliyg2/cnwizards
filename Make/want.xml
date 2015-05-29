@@ -63,9 +63,9 @@ See http://www.suigeneris.org/want/ for details.
   <property name="exe.DXE6"       value="%{env.DXE6}" if="env.DXE6" />
   <property name="exe.DXE6"       value="${ProgramFiles}\Embarcadero\Studio\14.0\Bin\DCC32.EXE" unless="env.DXE6" />
   <property name="exe.DXE7"       value="${ProgramFiles}\Embarcadero\Studio\15.0\Bin\DCC32.EXE" unless="env.DXE7" />
-  <property name="exe.DXE8"       value="${ProgramFiles}\Embarcadero\Studio\16.0\Bin\DCC32.EXE" unless="env.DXE8" />
+  <property name="exe.DXE8"       value="D:\Programs\Embarcadero\Studio\16.0\bin\DCC32.EXE" unless="env.DXE8" />
   <property name="exe.DXE81"      value="${ProgramFiles}\Embarcadero\Studio\16.0_1\Bin\DCC32.EXE" unless="env.DXE81" />
-  <property name="exe.D10S"       value="${ProgramFiles}\Embarcadero\Studio\17.0\Bin\DCC32.EXE" unless="env.D10S" />
+  <property name="exe.brcc32"     value="D:\Programs\Embarcadero\Studio\16.0\bin\brcc32.exe" />
   <property name="exe.D101B"      value="${ProgramFiles}\Embarcadero\Studio\18.0\Bin\DCC32.EXE" unless="env.D101B" />
   <property name="exe.D102T"      value="${ProgramFiles}\Embarcadero\Studio\19.0\Bin\DCC32.EXE" unless="env.D102T" />
   <property name="exe.D103R1"     value="${ProgramFiles}\Embarcadero\Studio\20.0_1\Bin\DCC32.EXE" unless="env.D103R1" />
