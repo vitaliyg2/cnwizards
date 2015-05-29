@@ -1614,6 +1614,11 @@ var
   SCnMatchButtonFrameMenuAnyHint: string = 'Match All Parts';
   SCnMatchButtonFrameMenuFuzzyCaption: string = '&Fuzzy Match';
   SCnMatchButtonFrameMenuFuzzyHint: string = 'Fuzzy Match';
+  // UnitsDependency
+  SCnUnitsDependencyMenuCaption: string = '&Units Dependency...';
+  SCnUnitsDependencyMenuHint: string = 'Build Units Dependency Reference';
+  SCnUnitsDependencyName: string = 'Units Dependency';
+  SCnUnitsDependencyComment: string = 'Build Units Dependency';
 
 implementation
 

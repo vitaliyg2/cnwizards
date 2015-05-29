@@ -218,7 +218,8 @@ uses
   CnImageProvider_FindIcons in 'Utils\CnImageProvider_FindIcons.pas',
   CnImageProvider_LocalCache in 'Utils\CnImageProvider_LocalCache.pas',
   CnFormatterIntf in 'CodeFormatter\CnFormatterIntf.pas',
-  CnCodeFormatterWizard in 'CodeFormatter\CnCodeFormatterWizard.pas' {CnCodeFormatterForm};
+  CnCodeFormatterWizard in 'CodeFormatter\CnCodeFormatterWizard.pas' {CnCodeFormatterForm},
+  CnUnitsDependency in 'SimpleWizards\CnUnitsDependency.pas';
 
 {$R *.RES}
 
