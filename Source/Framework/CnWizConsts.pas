@@ -1823,6 +1823,12 @@ var
   SCnCodeFormatterErrPascalErrorInterface: string = 'Interface Error.';
   SCnCodeFormatterErrPascalInvalidStatement: string = 'Invalid Statement.';
 
+  // UnitsDependency
+  SCnUnitsDependencyMenuCaption: string = '&Units Dependency...';
+  SCnUnitsDependencyMenuHint: string = 'Build Units Dependency Reference';
+  SCnUnitsDependencyName: string = 'Units Dependency';
+  SCnUnitsDependencyComment: string = 'Build Units Dependency';
+
   // CnAICoderWizard
   SCnAICoderWizardName: string = 'AI Coder Wizard';
   SCnAICoderWizardComment: string = 'AI Assistant for Coding';
