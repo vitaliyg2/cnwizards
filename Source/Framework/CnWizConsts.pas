@@ -1643,6 +1643,12 @@ var
   SCnCodeFormatterErrPascalErrorInterface: string = 'Interface Error.';
   SCnCodeFormatterErrPascalInvalidStatement: string = 'Invalid Statement.';
 
+  // UnitsDependency
+  SCnUnitsDependencyMenuCaption: string = '&Units Dependency...';
+  SCnUnitsDependencyMenuHint: string = 'Build Units Dependency Reference';
+  SCnUnitsDependencyName: string = 'Units Dependency';
+  SCnUnitsDependencyComment: string = 'Build Units Dependency';
+
   // CnMatchButtonFrame
   SCnMatchButtonFrameMenuStartCaption: string = 'Match From &Start';
   SCnMatchButtonFrameMenuStartHint: string = 'Match From Start';
