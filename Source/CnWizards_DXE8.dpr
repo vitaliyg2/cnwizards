@@ -219,7 +219,8 @@ uses
   CnImageProvider_LocalCache in 'Utils\CnImageProvider_LocalCache.pas',
   CnFormatterIntf in 'CodeFormatter\CnFormatterIntf.pas',
   CnCodeFormatterWizard in 'CodeFormatter\CnCodeFormatterWizard.pas' {CnCodeFormatterForm},
-  CnUnitsDependency in 'SimpleWizards\CnUnitsDependency.pas';
+  CnUnitsDependency in 'SimpleWizards\CnUnitsDependency.pas',
+  CnUnitsDependencyFrm in 'SimpleWizards\CnUnitsDependencyFrm.pas' {CnUnitsDependecyForm};
 
 {$R *.RES}
 

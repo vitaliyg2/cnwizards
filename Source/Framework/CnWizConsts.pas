@@ -1619,6 +1619,7 @@ var
   SCnUnitsDependencyMenuHint: string = 'Build Units Dependency Reference';
   SCnUnitsDependencyName: string = 'Units Dependency';
   SCnUnitsDependencyComment: string = 'Build Units Dependency';
+  SCnUnitsDependencyCompileFail: string = 'Compile Error. Unable to retrieve units dependency';
 
 implementation
 

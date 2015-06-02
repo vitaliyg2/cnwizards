@@ -32,18 +32,14 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ToolsAPI, IniFiles, Contnrs, CnWizMultiLang, CnWizClasses, CnWizConsts,
   CnCommon, CnConsts, CnWizUtils, CnDCU32, CnWizIdeUtils, CnWizEditFiler,
-  CnWizOptions, mPasLex, Math, TypInfo,
-  System.IOUtils, System.Types;
+  CnWizOptions, mPasLex, Math, TypInfo, ComCtrls,
+  System.IOUtils, System.Types, CnUnitsDependencyFrm, System.Generics.Collections;
 
 type
   TCnUnitsDependency = class(TCnMenuWizard)
   private
-    FIgnoreInit: Boolean;
-    FIgnoreReg: Boolean;
-    FIgnoreNoSrc: Boolean;
-    FIgnoreCompRef: Boolean;
-    FIgnoreList: TStringList;
-    FCleanList: TStringList;
+    FResultsForm: TCnUnitsDependecyForm;
+
     function CompileUnits(): Boolean;
     function ProcessUnits(List: TObjectList): Boolean;
   public
@@ -79,18 +75,12 @@ const
 constructor TCnUnitsDependency.Create;
 begin
   inherited;
-  FIgnoreInit := True;
-  FIgnoreReg := True;
-  FIgnoreNoSrc := False;
-  FIgnoreCompRef := True;
-  FIgnoreList := TStringList.Create;
-  FCleanList := TStringList.Create;
+  FResultsForm := TCnUnitsDependecyForm.Create(nil);
 end;
 
 destructor TCnUnitsDependency.Destroy;
 begin
-  FCleanList.Free;
-  FIgnoreList.Free;
+  FreeAndNil(FResultsForm);
   inherited;
 end;
 
@@ -101,8 +91,8 @@ begin
   if CnOtaGetProjectGroup <> nil then
   begin
     if not CompileUnits() then
-    begin      {$MESSAGE '-oVG TEST ONLY SCnUsesCleanerCompileFail'}
-      ErrorDlg(SCnUsesCleanerCompileFail);
+    begin
+      ErrorDlg(SCnUnitsDependencyCompileFail);
       Exit;
     end;
 
@@ -111,6 +101,7 @@ begin
     try
       if ProcessUnits(List) then  {$MESSAGE '-oVG build uses graph'}
       begin
+
       end;
     finally
       List.Free;
@@ -143,8 +134,6 @@ function TCnUnitsDependency.ProcessUnits(List: TObjectList): Boolean;
 var
   Module: IOTAModule;
   Project: IOTAProject;
-  DcuPath: string;
-  DcuName: string;
 
   function GetProjectDcuPath(AProject: IOTAProject): string;
   begin
@@ -171,45 +160,147 @@ var
 
   function ProcessAProject(AProject: IOTAProject; OpenedOnly: Boolean): Boolean;
   var
-    i, j: Integer;
-    UsesInfo: TCnUnitUsesInfo;
-    TextFile: TFileStream;
-    Writer: TStreamWriter;
-    DcuFLPs: TStringDynArray;
-  begin
-    DcuPath := GetProjectDcuPath(Project);
-    DcuFLPs := TDirectory.GetFiles(DcuPath, '*.dcu');
-    TextFile := TFileStream.Create(TPath.Combine(DcuPath, 'Dependency.txt'), fmCreate);
-    Writer := TStreamWriter.Create(TextFile);
-    try
-      for i := 0 to Length(DcuFLPs) - 1 do
+    UsesInfos: TObjectList<TCnUnitUsesInfo>;
+    ProcessedUnitNames: TStringList;
+
+{$MESSAGE '-oVG TEST ONLY'}
+//    function FindUsesInfo(const aUnitName: string; out aUsesInfo: TCnUnitUsesInfo): Boolean;
+//    var
+//      i: Integer;
+//    begin
+//      for i := 0 to UsesInfos.Count - 1 do
+//      begin
+//        aUsesInfo := UsesInfos[i];
+//        Result := (aUsesInfo.UnitName = aUnitName);
+//        if Result then
+//          Exit;
+//      end;
+//      Result := False;
+//    end;
+
+    procedure ProcessUnitInfo(const aUnitName: string; aParentNode: TTreeNode);
+      function UsesUnit(aUsesInfo: TCnUnitUsesInfo; const aUnitName: string): Boolean;
+      var
+        i: Integer;
       begin
-        DcuName := DcuFLPs[i];
-        if not FileExists(DcuName) then
-          Continue;
-        UsesInfo := TCnUnitUsesInfo.Create(DcuName);
-        try
-          UsesInfo.Sort;
-          Writer.WriteLine(DcuName);
-          Writer.WriteLine('|Interface');
-          for j := 0 to UsesInfo.IntfUsesCount - 1 do
-          begin
-            Writer.WriteLine('||'+UsesInfo.IntfUses[j]);
-          end;
-          Writer.WriteLine('|Implementation');
-          for j := 0 to UsesInfo.ImplUsesCount - 1 do
-          begin
-            Writer.WriteLine('||'+UsesInfo.ImplUses[j]);
-          end;
-          Writer.WriteLine('');
-          //WriteUsesInfoXML()
-        finally
-          FreeAndNil(UsesInfo);
+        for i := 0 to aUsesInfo.IntfUsesCount - 1 do
+        begin
+          Result := (aUnitName = aUsesInfo.IntfUses[i]);
+          if Result then
+            Exit;
         end;
+
+        for i := 0 to aUsesInfo.ImplUsesCount - 1 do
+        begin
+          Result := (aUnitName = aUsesInfo.ImplUses[i]);
+          if Result then
+            Exit;
+        end;
+
+        Result := False;
+      end;
+    var
+      Node: TTreeNode;
+      UsesInfo: TCnUnitUsesInfo;
+    begin
+      if ProcessedUnitNames.IndexOf(aUnitName) = -1 then
+      begin
+        ProcessedUnitNames.Add(aUnitName);
+
+        Node := FResultsForm.chktvResult.Items.AddChild(aParentNode, aUnitName);
+        for UsesInfo in UsesInfos do
+        begin
+          if UsesUnit(UsesInfo, aUnitName) then
+          begin
+            ProcessUnitInfo(UsesInfo.UnitName, Node);
+          end;
+        end;
+      end
+      else
+      begin
+        Node := FResultsForm.chktvResult.Items.AddChild(aParentNode, aUnitName + ' (Cycle)');
+      end;
+    end;
+
+  var
+    DcuPath: string;
+
+    procedure AddUsesInfoForUnit(const aUnitName: string; aParentNode: TTreeNode);
+      function UnitInfoExists(const aUnitName: string): Boolean;
+      var
+        UsesInfo: TCnUnitUsesInfo;
+      begin
+        for UsesInfo in UsesInfos do
+        begin
+          Result := (UsesInfo.UnitName = aUnitName);
+          if Result then
+            Exit;
+        end;
+        Result := False;
+      end;
+    var
+      DcuFLP: string;
+      UsesInfo: TCnUnitUsesInfo;
+      i: Integer;
+      Node: TTreeNode;
+    begin
+      DcuFLP := TPath.Combine(DcuPath, aUnitName + csDcuExt);
+      if not FileExists(DcuFLP) or UnitInfoExists(aUnitName) then
+        Exit;
+
+      //Node := FResultsForm.chktvResult.Items.AddChild(aParentNode, aUnitName);
+
+      UsesInfo := TCnUnitUsesInfo.Create(DcuFLP);
+      try
+        UsesInfo.Sort;
+      except
+        FreeAndNil(UsesInfo);
+        raise;
+      end;
+      UsesInfos.Add(UsesInfo);
+
+      for i := 0 to UsesInfo.IntfUsesCount - 1 do
+        AddUsesInfoForUnit(UsesInfo.IntfUses[i], Node);
+
+      for i := 0 to UsesInfo.ImplUsesCount - 1 do
+        AddUsesInfoForUnit(UsesInfo.ImplUses[i], Node);
+    end;
+
+  var
+    i: Integer;
+    Module: IOTAModule;
+    ModuleInfo: IOTAModuleInfo;
+    CurrentUnitName: string;
+  begin
+    Module := CnOtaGetCurrentModule;
+    Result := Assigned(Module);
+    if not Result then
+      Exit;
+
+    CurrentUnitName := TPath.GetFileNameWithoutExtension(Module.FileName);
+
+    DcuPath := GetProjectDcuPath(Project);
+
+    UsesInfos := TObjectList<TCnUnitUsesInfo>.Create;
+    try
+      for i := 0 to AProject.GetModuleCount - 1 do
+      begin
+        ModuleInfo := AProject.GetModule(i);
+        if not Assigned(ModuleInfo) then
+         Continue;
+        AddUsesInfoForUnit(TPath.GetFileNameWithoutExtension(ModuleInfo.FileName), nil);
+      end;
+
+      ProcessedUnitNames := TStringList.Create;
+      try
+        FResultsForm.chktvResult.Items.Clear;
+        ProcessUnitInfo(CurrentUnitName, nil);
+        FResultsForm.Show;
+      finally
+        FreeAndNil(ProcessedUnitNames);
       end;
     finally
-      FreeAndNil(Writer);
-      FreeAndNil(TextFile);
+      FreeAndNil(UsesInfos);
     end;
     Result := True;
   end;
