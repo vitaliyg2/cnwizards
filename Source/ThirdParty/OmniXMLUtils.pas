@@ -376,6 +376,7 @@ type
   {:Encode a stream into base64 form.
   }
   procedure Base64Encode(const decoded, encoded: TStream);
+  function GetTextChild(node: IXMLNode): IXMLNode;
 
 implementation
 
