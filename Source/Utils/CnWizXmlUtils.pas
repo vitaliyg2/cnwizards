@@ -46,10 +46,16 @@ uses
   OmniXML, OmniXMLUtils;
 {$ENDIF}
 
-{$IFDEF CN_USE_MSXML}
 type
-  IXMLNode = IXMLDOMNode;
+{$IFDEF CN_USE_MSXML}
   IXMLDocument = IXMLDOMDocument;
+  IXMLNode = IXMLDOMNode;
+  IXMLNodeList = IXMLDOMNodeList;
+{$ELSE}
+  IXMLDocument = OmniXML.IXMLDocument;
+  IXMLNode = OmniXML.IXMLNode;
+  IXMLNodeList = OmniXML.IXMLNodeList;
+{$ENDIF}
 
 function XMLStrToInt(nodeValue: WideString; var value: integer): boolean;
 function XMLStrToIntDef(nodeValue: WideString; defaultValue: integer): integer;
@@ -65,12 +71,10 @@ function GetNodeTextInt(parentNode: IXMLNode; nodeTag: string;
 function GetNodeTextStr(parentNode: IXMLNode; nodeTag: string;
   defaultValue: WideString): WideString;
 function FindNode(parentNode: IXMLNode; matchesName: string): IXMLNode;
-function CreateXMLDoc: IXMLDOMDocument;
-{$ENDIF}
+function CreateXMLDoc: IXMLDocument;
 
 implementation
 
-{$IFDEF CN_USE_MSXML}
 function XMLStrToInt(nodeValue: WideString; var value: integer): boolean;
 begin
   try
@@ -112,6 +116,7 @@ begin
 end;
 
 function GetTextChild(node: IXMLNode): IXMLNode;
+{$IFDEF CN_USE_MSXML}
 var
   iText: integer;
 begin
@@ -122,6 +127,11 @@ begin
       Break; //for
     end;
 end;
+{$ELSE}
+begin
+  Result := OmniXMLUtils.GetTextChild(node);
+end;
+{$ENDIF}
 
 function GetNodeText(parentNode: IXMLNode; nodeTag: string;
   var nodeText: WideString): boolean;
@@ -171,15 +181,13 @@ begin
   Result := nil;
 end;
 
-function CreateXMLDoc: IXMLDOMDocument;
+function CreateXMLDoc: IXMLDocument;
 begin
-  try
-    Result := CreateOleObject('Microsoft.XMLDOM') as IXMLDomDocument;
-  except
-    ;
-  end;
-end;
-
+{$IFDEF CN_USE_MSXML}
+  Result := CreateOleObject('Microsoft.XMLDOM') as IXMLDocument;
+{$ELSE}
+  Result := OmniXML.CreateXMLDoc;
 {$ENDIF}
+end;
 
 end.
