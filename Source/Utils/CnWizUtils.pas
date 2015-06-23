@@ -9003,18 +9003,54 @@ end;
 // 判断正则表达式匹配
 function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
   APattern: string; IsMatchStart: Boolean = False): Boolean;
+var
+  Patterns: TArray<string>;
+  i: Integer;
+  NegateMatch: Boolean;
 begin
   Result := True;
+  APattern := Trim(APattern);
   if (APattern = '') or (ARegExpr = nil) then Exit;
 
-  if IsMatchStart and (APattern[1] <> '^') then // 额外的从头匹配
-    APattern := '^' + APattern;
+  Patterns := APattern.Split([' ']);
+  if Length(Patterns) > 1 then
+  begin
+    for i := 0 to  Length(Patterns) - 1 do
+    begin
+      NegateMatch := (Copy(Patterns[i], 1, 1) = '-');
+      if NegateMatch then
+        Delete(Patterns[i], 1, 1);
 
-  ARegExpr.Expression := APattern;
-  try
-    Result := ARegExpr.Exec(AText);
-  except
-    Result := False;
+      if Patterns[i] = '' then
+        Continue;
+
+      ARegExpr.Expression := Patterns[i];
+      try
+        Result := ARegExpr.Exec(AText);
+      except
+        Result := not NegateMatch;
+      end;
+
+      if (not Result and not NegateMatch) or (Result and NegateMatch) then
+      begin
+        Result := False;
+        Exit;
+      end
+      else
+        Result := True;
+    end;
+  end
+  else
+  begin
+    if IsMatchStart and (APattern[1] <> '^') then // 额外的从头匹配
+      APattern := '^' + APattern;
+
+    ARegExpr.Expression := APattern;
+    try
+      Result := ARegExpr.Exec(AText);
+    except
+      Result := False;
+    end;
   end;
 end;
 
