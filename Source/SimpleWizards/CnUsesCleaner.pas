@@ -842,6 +842,7 @@ var
   FileName: string;
   Kinds: TCnUsesKinds;
   Checked: Boolean;
+  EmptyUsesInfo: TCnEmptyUsesInfo;
 begin
   // 分析公共的单元
   UnitList := TStringList.Create;
@@ -850,15 +851,15 @@ begin
     UnitList.Sorted := True;
     for i := 0 to List.Count - 1 do
       for j := 0 to TCnProjectUsesInfo(List[i]).Units.Count - 1 do
-        with TCnEmptyUsesInfo(TCnProjectUsesInfo(List[i]).Units[j]) do
-        begin
-          for k := 0 to IntfCount - 1 do
-            if UnitList.IndexOf(IntfItems[k].Name) < 0 then
-              UnitList.AddObject(IntfItems[k].Name, TObject(Pointer(Project)));
-          for k := 0 to ImplCount - 1 do
-            if UnitList.IndexOf(ImplItems[k].Name) < 0 then
-              UnitList.AddObject(ImplItems[k].Name, TObject(Pointer(Project)));
-        end;
+      begin
+        EmptyUsesInfo := TCnEmptyUsesInfo(TCnProjectUsesInfo(List[i]).Units[j]);
+        for k := 0 to EmptyUsesInfo.IntfCount - 1 do
+          if UnitList.IndexOf(EmptyUsesInfo.IntfItems[k].Name) < 0 then
+            UnitList.AddObject(EmptyUsesInfo.IntfItems[k].Name, EmptyUsesInfo);
+        for k := 0 to EmptyUsesInfo.ImplCount - 1 do
+          if UnitList.IndexOf(EmptyUsesInfo.ImplItems[k].Name) < 0 then
+            UnitList.AddObject(EmptyUsesInfo.ImplItems[k].Name, EmptyUsesInfo);
+      end;
 
     // 分析单元类型
     for u := 0 to UnitList.Count - 1 do
@@ -871,7 +872,7 @@ begin
         Include(Kinds, ukInIgnoreList);
 
       FileName := GetFileNameFromModuleName(UnitList[u],
-        IOTAProject(Pointer(UnitList.Objects[u])));
+        TCnEmptyUsesInfo(UnitList.Objects[u]).Project);
     {$IFDEF DEBUG}
       CnDebugger.LogMsg('Check Unit ' + UnitList[u] + ': ' + FileName);
     {$ENDIF}
