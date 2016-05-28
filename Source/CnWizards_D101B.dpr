@@ -133,6 +133,7 @@ uses
   CnProjectViewBaseFrm in 'ProjectExtWizard\CnProjectViewBaseFrm.pas' {CnProjectViewBaseForm},
   CnProjectViewUnitsFrm in 'ProjectExtWizard\CnProjectViewUnitsFrm.pas' {CnProjectViewUnitsForm},
   CnProjectViewFormsFrm in 'ProjectExtWizard\CnProjectViewFormsFrm.pas' {CnProjectViewFormsForm},
+  CnProjectOpenFileFrm in 'ProjectExtWizard\CnProjectOpenFileFrm.pas' {CnProjectOpenFileForm},
   CnProjectUseUnitsFrm in 'ProjectExtWizard\CnProjectUseUnitsFrm.pas' {CnProjectViewUnitsForm},
   CnProjectFramesFrm in 'ProjectExtWizard\CnProjectFramesFrm.pas' {CnProjectFramesForm},
   CnProjectListUsedFrm in 'ProjectExtWizard\CnProjectListUsedFrm.pas' {CnProjectListUsedForm},
@@ -217,8 +218,11 @@ uses
   CnImageProvider_IconFinder in 'Utils\CnImageProvider_IconFinder.pas',
   CnImageProvider_FindIcons in 'Utils\CnImageProvider_FindIcons.pas',
   CnImageProvider_LocalCache in 'Utils\CnImageProvider_LocalCache.pas',
+  CnEditorSortUsesList in 'EditorWizard\CnEditorSortUsesList.pas',
   CnFormatterIntf in 'CodeFormatter\CnFormatterIntf.pas',
-  CnCodeFormatterWizard in 'CodeFormatter\CnCodeFormatterWizard.pas' {CnCodeFormatterForm};
+  CnCodeFormatterWizard in 'CodeFormatter\CnCodeFormatterWizard.pas' {CnCodeFormatterForm},
+  CnUnitsDependency in 'SimpleWizards\CnUnitsDependency.pas',
+  CnUnitsDependencyFrm in 'SimpleWizards\CnUnitsDependencyFrm.pas' {CnUnitsDependecyForm};
 
 {$R *.RES}
 

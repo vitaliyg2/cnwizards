@@ -496,6 +496,7 @@
         <DCCReference Include="Utils\CnImageProvider_IconFinder.pas"/>
         <DCCReference Include="Utils\CnImageProvider_FindIcons.pas"/>
         <DCCReference Include="Utils\CnImageProvider_LocalCache.pas"/>
+        <DCCReference Include="EditorWizard\CnEditorSortUsesList.pas"/>
         <DCCReference Include="CodeFormatter\CnFormatterIntf.pas"/>
         <DCCReference Include="CodeFormatter\CnCodeFormatterWizard.pas">
             <Form>CnCodeFormatterForm</Form>
@@ -910,6 +911,7 @@
                 <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
             </Deployment>
+            <ModelSupport>False</ModelSupport>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>
     </ProjectExtensions>
