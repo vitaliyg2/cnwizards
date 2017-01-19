@@ -479,7 +479,6 @@ type
     FViewFileNameIsPascalList: TList;
 {$IFDEF BDS}
     FRawLineText: string; // Ansi/Utf8/Utf16
-    FUseTabKey: Boolean;
     FTabWidth: Integer;
 {$ELSE}
     FHighLightCurrentLine: Boolean;
@@ -577,7 +576,6 @@ type
     procedure RepaintEditors;
     {* 让设置窗口调用，强迫重画}
 {$IFDEF BDS}
-    property UseTabKey: Boolean read FUseTabKey;
     {* 当前编辑器环境是否使用 Tab 键，从 IDE 选项获得，供外界使用}
     property TabWidth: Integer read FTabWidth;
     {* 当前编辑器环境的 Tab 宽度，从 IDE 选项获得，供外界使用}
@@ -1260,7 +1258,6 @@ begin
   {$ENDIF}
 
         {$IFDEF BDS}
-        CppParser.UseTabKey := FHighlight.FUseTabKey;
         CppParser.TabWidth := FHighlight.FTabWidth;
         {$ENDIF}
 
@@ -1337,7 +1334,6 @@ begin
   {$ENDIF}
 
         {$IFDEF BDS}
-        PasParser.UseTabKey := FHighlight.FUseTabKey;
         PasParser.TabWidth := FHighlight.FTabWidth;
         {$ENDIF}
 
@@ -5153,7 +5149,6 @@ end;
 
 procedure TCnSourceHighlight.UpdateTabWidth;
 begin
-  FUseTabKey := EditControlWrapper.GetUseTabKey;
   FTabWidth := EditControlWrapper.GetTabWidth;
 
 {$IFDEF DEBUG}

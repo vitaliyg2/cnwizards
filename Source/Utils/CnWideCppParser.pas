@@ -80,7 +80,6 @@ type
     FCurrentClass: CnWideString;
     FSource: CnWideString;
     FBlockIsNamespace: Boolean;
-    FUseTabKey: Boolean;
     FTabWidth: Integer;
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnWideCppToken;
@@ -116,7 +115,6 @@ type
     property CurrentClass: CnWideString read FCurrentClass;
     property CurrentChildMethod: CnWideString read FCurrentChildMethod;
 
-    property UseTabKey: Boolean read FUseTabKey write FUseTabKey;
     {* 是否排版处理 Tab 键的宽度，如不处理，则将 Tab 键当作宽为 1 处理}
     property TabWidth: Integer read FTabWidth write FTabWidth;
     {* Tab 键的宽度}
@@ -221,40 +219,26 @@ var
   PrevIsOperator, RunReachedZero: Boolean;
 
   procedure CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer);
-  var
-    I, AnsiLen, WideLen: Integer;
-  begin
-    if FUseTabKey and (FTabWidth >= 2) then
+    function GetTabsCount: Integer;
+    var
+      i: Integer;
     begin
-      // 遍历当前行内容进行 Tab 键展开
-      I := CParser.LineStartOffset;
-      AnsiLen := 0;
-      WideLen := 0;
-      while (I < CParser.RunPosition) do
-      begin
+      Result := 0;
+      for i := CParser.LineStartOffset to CParser.RunPosition - 1 do
         if (ASource[I] = #09) then
-        begin
-          AnsiLen := ((AnsiLen div FTabWidth) + 1) * FTabWidth;
-          WideLen := ((WideLen div FTabWidth) + 1) * FTabWidth;
-          // TODO: Wide 字符串的 Tab 展开规则是否是这样？
-        end
-        else
-        begin
-          Inc(WideLen);
-          if Ord(ASource[I]) > $900 then
-            Inc(AnsiLen, SizeOf(WideChar))
-          else
-            Inc(AnsiLen, SizeOf(AnsiChar));
-        end;
-        Inc(I);
-      end;
-      ACharIndex := WideLen;
-      AnAnsiIndex := AnsiLen;
-    end
-    else
+          Inc(Result);
+    end;
+  var
+    ExtraSpaceForTabs: Integer;
+	begin
+    ACharIndex := CParser.RawColNumber - 1;
+    AnAnsiIndex := CParser.ColumnNumber - 1;
+
+    if (FTabWidth > 1) then
     begin
-      ACharIndex := CParser.RawColNumber - 1;
-      AnAnsiIndex := CParser.ColumnNumber - 1;
+      ExtraSpaceForTabs := GetTabsCount * (FTabWidth - 1);
+      Inc(ACharIndex, ExtraSpaceForTabs);
+      Inc(AnAnsiIndex, ExtraSpaceForTabs);
     end;
   end;
 
