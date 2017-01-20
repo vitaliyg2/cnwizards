@@ -219,24 +219,25 @@ var
   PrevIsOperator, RunReachedZero: Boolean;
 
   procedure CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer);
-    function GetTabsCount: Integer;
+    function GetExtraSpaceForTabs: Integer;
     var
-      i: Integer;
+      i, LineLength: Integer;
     begin
       Result := 0;
-      for i := CParser.LineStartOffset to CParser.RunPosition - 1 do
-        if (ASource[I] = #09) then
-          Inc(Result);
+      LineLength := CParser.RunPosition - CParser.LineStartOffset;
+      for i := 0 to LineLength - 1 do
+        if (ASource[CParser.LineStartOffset + i] = #09) then
+          Inc(Result, FTabWidth - 1 - ((i + Result) mod FTabWidth));
     end;
   var
     ExtraSpaceForTabs: Integer;
-	begin
+  begin
     ACharIndex := CParser.RawColNumber - 1;
     AnAnsiIndex := CParser.ColumnNumber - 1;
 
     if (FTabWidth > 1) then
     begin
-      ExtraSpaceForTabs := GetTabsCount * (FTabWidth - 1);
+      ExtraSpaceForTabs := GetExtraSpaceForTabs;
       Inc(ACharIndex, ExtraSpaceForTabs);
       Inc(AnAnsiIndex, ExtraSpaceForTabs);
     end;

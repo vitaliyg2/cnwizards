@@ -448,7 +448,7 @@ var
   AIfObj: TCnIfStatement;
 
   procedure CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer);
-    function GetTabsCount: Integer;
+    function GetExtraSpaceForTabs: Integer;
     var
       i, LineLength: Integer;
     begin
@@ -456,7 +456,7 @@ var
       LineLength := Lex.TokenPos - Lex.LineStartOffset;
       for i := 0 to LineLength - 1 do
         if (ASource[Lex.LineStartOffset + i] = #09) then
-          Inc(Result);
+          Inc(Result, FTabWidth - 1 - ((i + Result) mod FTabWidth));
     end;
   var
     ExtraSpaceForTabs: Integer;
@@ -466,7 +466,7 @@ var
 
     if (FTabWidth > 1) then
     begin
-      ExtraSpaceForTabs := GetTabsCount * (FTabWidth - 1);
+      ExtraSpaceForTabs := GetExtraSpaceForTabs;
       Inc(ACharIndex, ExtraSpaceForTabs);
       Inc(AnAnsiIndex, ExtraSpaceForTabs);
     end;
