@@ -141,8 +141,8 @@ end;
 procedure TCnEditorSortUsesList.GetEditorInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorSortUsesListName;
-  Author := SCnPack_VitaliyG;
-  Email := SCnPack_VitaliyGEmail;
+  Author := 'github.com/vitaliyg2';
+  Email := 'vitaliygrabchuk@gmail.com';
 end;
 
 { TUsesSort }
