@@ -4065,8 +4065,8 @@ begin
 {$IFDEF BDS}
                 // BDS 下需要挨个绘制字符，因为 BDS 自身采用的是加粗的字符间距绘制
 
-                EditPosColBase := CalcTokenEditColForAttribute(Token);
-                EditPos.Col := EditPosColBase;
+                EditPosColBaseForAttribute := CalcTokenEditColForAttribute(Token);
+                EditPos.Col := EditPosColBaseForAttribute;
                 EditPos.Line := Token.EditLine;
                 EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
                   Element, LineFlag);

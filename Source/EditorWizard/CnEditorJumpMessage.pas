@@ -852,7 +852,6 @@ begin
   begin
     PasParser := TCnGeneralPasStructParser.Create;
 {$IFDEF BDS}
-    PasParser.UseTabKey := True;
     PasParser.TabWidth := EditControlWrapper.GetTabWidth;
 {$ENDIF}
   end;
@@ -861,7 +860,6 @@ begin
   begin
     CppParser := TCnGeneralCppStructParser.Create;
 {$IFDEF BDS}
-    CppParser.UseTabKey := True;
     CppParser.TabWidth := EditControlWrapper.GetTabWidth;
 {$ENDIF}
   end;

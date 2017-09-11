@@ -248,7 +248,7 @@ var
       if not FileExists(DcuFLP) or UnitInfoExists(aUnitName) then
         Exit;
 
-      //Node := FResultsForm.chktvResult.Items.AddChild(aParentNode, aUnitName);
+      Node := FResultsForm.chktvResult.Items.AddChild(aParentNode, aUnitName);
 
       UsesInfo := TCnUnitUsesInfo.Create(DcuFLP);
       try
