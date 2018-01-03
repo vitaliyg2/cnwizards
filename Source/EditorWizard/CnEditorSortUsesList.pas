@@ -246,11 +246,14 @@ var
   i: Integer;
   Settings: TStringList;
 begin
+  XmlDoc := CreateXMLDoc;
+  if not Assigned(XmlDoc) then
+    raise ECnWizardException.Create('Failed to create XML document');
+
   Settings := TStringList.Create;
   try
-    XmlDoc := CreateXMLDoc;
     if not WizOptions.LoadUserFile(Settings, 'UsesSortSettings.xml') or
-      not Assigned(XmlDoc) or not XmlDoc.loadXML(Settings.Text)
+      not XmlDoc.loadXML(Settings.Text)
     then
       raise ECnWizardException.Create('Failed to load uses sorter settings');
   finally
@@ -316,6 +319,7 @@ end;
 function TUnitGroup.ProcessUnitMatch(const aUnitName: string): Boolean;
 var
   UnitOrderIndex, i, FoundUnitIndex: Integer;
+  GroupUnitName: string;
 begin
   UnitOrderIndex := -1;
 
@@ -325,7 +329,26 @@ begin
   begin
     UnitOrderIndex := FUnitNames.IndexOf(aUnitName);
     Result := (UnitOrderIndex <> -1);
-    if not Result then
+    if Result then
+      Exit;
+
+    if (FUnitScopeNames.Count = 1) and (FUnitScopeNames[0]= '*') then
+    begin
+      for i := 0 to FUnitNames.Count - 1 do
+      begin
+        GroupUnitName := FUnitNames[i];
+        Result := SameText(StrRight(GroupUnitName, Length(aUnitName) + 1),
+          '.' + aUnitName);
+
+        if Result then
+        begin
+          UnitOrderIndex := i;
+          Break;
+        end;
+      end;
+    end
+    else
+    begin
       for i := 0 to FUnitScopeNames.Count - 1 do
       begin
         UnitOrderIndex := FUnitNames.IndexOf(FUnitScopeNames[i] + '.' + aUnitName);
@@ -333,6 +356,7 @@ begin
         if Result then
           Break;
       end;
+    end;
   end;
 
   if (not Result) then
