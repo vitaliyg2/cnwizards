@@ -1,7 +1,7 @@
 {******************************************************************************}
 {                       CnPack For Delphi/C++Builder                           }
 {                     中国人自己的开放源码第三方开发包                         }
-{                   (C)Copyright 2001-2014 CnPack 开发组                       }
+{                   (C)Copyright 2001-2018 CnPack 开发组                       }
 {                   ------------------------------------                       }
 {                                                                              }
 {            本开发包是开源的自由软件，您可以遵照 CnPack 的发布协议来修        }
@@ -29,7 +29,11 @@ unit CnProjectOpenFileFrm;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2004.2.22 V2.1
+* 修改记录：2018.3.28 V2.3
+*               跟随基类重构以支持模糊匹配
+*           2015.1.17 V2.2
+*               允许显示工程中类型为 Unknown 的文件
+*           2004.2.22 V2.1
 *               重写所有代码
 *           2004.2.18 V2.0 by Leeon
 *               更改两个列表框架
@@ -68,23 +72,32 @@ uses
   StrUtils,
 {$ENDIF}
   ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles, ToolsAPI,
-  Graphics, CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnIni,
-  CnWizIdeUtils, CnWizMultiLang, CnProjectViewBaseFrm, CnWizEditFiler,
-  ImgList, ActnList, System.Actions;
+  Graphics, ImgList, ActnList, CnStrings, CnCommon, CnConsts, CnWizConsts,
+  CnWizOptions, CnWizUtils, CnIni, CnWizIdeUtils, CnWizMultiLang,
+  CnProjectViewBaseFrm, CnWizEditFiler, System.Actions;
 
 type
 
   TCnUnitType = (utUnknown, utProject, utPackage, utDataModule, utForm, utUnit,
     utAsm, utC, utH, utRC);
 
-  TCnUnitInfo = class
+  TCnUnitInfo = class(TCnBaseElementInfo)
+  private
+    FIsOpened: Boolean;
+    FSize: Integer;
+    FImageIndex: Integer;
+    FFileName: string;
+    FProject: string;
+    FUnitType: TCnUnitType;
+    FRelPath: string;
   public
-    Name: string;
-    FileName: string;
-    Path: string;
-    Size: Integer;
-    IsOpened: Boolean;
-    ImageIndex: Integer;
+    property FileName: string read FFileName write FFileName;
+    property RelPath: string read FRelPath write FRelPath;
+    property Project: string read FProject write FProject;
+    property Size: Integer read FSize write FSize;
+    property UnitType: TCnUnitType read FUnitType write FUnitType;
+    property IsOpened: Boolean read FIsOpened write FIsOpened;
+    property ImageIndex: Integer read FImageIndex write FImageIndex;
   end;
 
 //==============================================================================
@@ -102,7 +115,6 @@ type
   private
     FSearchPaths: TStringList;
 
-
     procedure FillUnitInfo(AInfo: TCnUnitInfo);
     procedure DoFindFile(const aFileName: string; const Info: TSearchRec; var Abort: Boolean);
   protected
@@ -113,9 +125,12 @@ type
     function GetHelpTopic: string; override;
     procedure CreateList; override;
     procedure UpdateComboBox; override;
-    procedure DoUpdateListView; override;
-    procedure DoSortListView; override;
-    procedure DrawListItem(ListView: TCustomListView; Item: TListItem); override;
+    procedure DrawListPreParam(Item: TListItem; ListCanvas: TCanvas); override;
+
+    function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
+      DataListIndex: Integer; MatchedIndexes: TList): Boolean; override;
+    function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
+      const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; override;
   public
     destructor Destroy; override;
 
@@ -130,8 +145,8 @@ const
   csViewUnits = 'ViewUnits';
 
   csUnitImageIndexs: array[TCnUnitType] of Integer =
-    (-1, 76, 77, 73, 67, 78, 79, 80, 81, 89);
-  
+    (26, 76, 77, 73, 67, 78, 79, 80, 81, 89); // 26 means unknown
+
 function ShowProjectOpenFile(Ini: TCustomIniFile; out Hooked: Boolean): Boolean;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
@@ -173,6 +188,76 @@ end;
 
 { TCnProjectViewUnitsForm }
 
+function TCnProjectOpenFileForm.SortItemCompare(ASortIndex: Integer;
+  const AMatchStr, S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer;
+var
+  Info1, Info2: TCnUnitInfo;
+begin
+  Info1 := TCnUnitInfo(Obj1);
+  Info2 := TCnUnitInfo(Obj2);
+
+  case ASortIndex of // 因为搜索时只有名称一列参与匹配，因此排序时要考虑到把名称匹配时的全匹配提前
+    0:
+      begin
+        Result := CompareTextWithPos(AMatchStr, Info1.Text, Info2.Text, SortDown);
+      end;
+    1:
+      begin
+        Result := CompareText(Info1.RelPath, Info2.RelPath);
+        if SortDown then
+          Result := -Result;
+      end;
+    2:
+      begin
+        Result := CompareValue(Info1.Size, Info2.Size);
+        if SortDown then
+          Result := -Result;
+      end;
+    3, 4:
+      begin
+        Result := CompareText(Info1.Project, Info2.Project);
+        if SortDown then
+          Result := -Result;
+      end;
+  else
+    Result := 0;
+  end;
+end;
+
+function TCnProjectOpenFileForm.CanMatchDataByIndex(
+  const AMatchStr: string; AMatchMode: TCnMatchMode;
+  DataListIndex: Integer; MatchedIndexes: TList): Boolean;
+var
+  Info: TCnUnitInfo;
+begin
+  Result := False;
+
+  // 先限定工程，工程不符合条件的先剔除
+  Info := TCnUnitInfo(DataList.Objects[DataListIndex]);
+  if (ProjectInfoSearch <> nil) and (ProjectInfoSearch <> Info.ParentProject) then
+    Exit;
+
+  if AMatchStr = '' then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  case AMatchMode of // 搜索时单元名参与匹配，不区分大小写
+    mmStart:
+      begin
+        Result := (Pos(UpperCase(AMatchStr), UpperCase(DataList[DataListIndex])) = 1);
+      end;
+    mmAnywhere:
+      begin
+        Result := (Pos(UpperCase(AMatchStr), UpperCase(DataList[DataListIndex])) > 0);
+      end;
+    mmFuzzy:
+      begin
+        Result := FuzzyMatchStr(AMatchStr, DataList[DataListIndex], MatchedIndexes);
+      end;
+  end;
+end;
 function TCnProjectOpenFileForm.DoSelectOpenedItem: string;
 var
   CurrentModule: IOTAModule;
@@ -193,16 +278,31 @@ begin
 end;
 
 procedure TCnProjectOpenFileForm.FillUnitInfo(AInfo: TCnUnitInfo);
+var
+  Reader: TCnEditFiler;
 begin
   AInfo.IsOpened := CnOtaIsFileOpen(AInfo.FileName);
+
+  Reader := nil;
   try
-    AInfo.Size := GetFileSize(AInfo.FileName);
-  except
-    AInfo.Size := 0;
+    try
+      if not AInfo.IsOpened then
+      begin
+        AInfo.Size := GetFileSize(AInfo.FileName);
+      end
+      else
+      begin
+        Reader := TCnEditFiler.Create(AInfo.FileName);
+        AInfo.Size := Reader.FileSize;
+      end;
+    except
+      AInfo.Size := 0;
+    end;
+  finally
+    Reader.Free;
   end;
 
-  {$MESSAGE '-oVG TEST ONLY remove image'}
-  AInfo.ImageIndex := csUnitImageIndexs[utUnit];
+  AInfo.ImageIndex := csUnitImageIndexs[AInfo.UnitType];
 end;
 
 procedure TCnProjectOpenFileForm.OpenSelect;
@@ -323,13 +423,38 @@ begin
   UnitInfo := TCnUnitInfo.Create;
   with UnitInfo do
   begin
-    Name := _CnExtractFileName(aFileName);
-    Path := _CnExtractFilePath(aFileName);
+    Text := _CnChangeFileExt(_CnExtractFileName(aFileName), '');
     FileName := aFileName;
+    RelPath := GetRelativePath(_CnExtractFilePath(aFileName),
+      _CnExtractFilePath(ProjectInfo.FileName));
+
+  {$IFDEF SUPPORT_MODULETYPE}
+    // todo: Check ModuleInfo.ModuleType
+  {$ELSE}
+    if IsRC(aFileName) then
+      UnitType := utRC
+    else if (FileExists(ChangeFileExt(aFileName,'.dfm'))) then
+      UnitType := utForm
+    else if IsPas(aFileName) or IsCpp(aFileName) then
+      UnitType := utUnit
+    else if IsAsm(aFileName) then
+      UnitType := utAsm
+    else if IsC(aFileName) then
+      UnitType := utC
+    else if IsH(aFileName) then
+      UnitType := utH
+    else
+      UnitType := utUnknown;
+  {$ENDIF}
+
+    // 未知类型文件不隐藏扩展名
+    if UnitType = utUnknown then
+      Text := _CnExtractFileName(aFileName);
   end;
 
   FillUnitInfo(UnitInfo);
-  ProjectInfo.InfoList.Add(UnitInfo);  // 添加模块信息到 ProjectInfo
+  UnitInfo.ParentProject := ProjectInfo;
+  DataList.AddObject(UnitInfo.Text, UnitInfo);
 end;
 
 procedure TCnProjectOpenFileForm.CreateList;
@@ -365,102 +490,6 @@ begin
   end;
 end;
 
-procedure TCnProjectOpenFileForm.DoUpdateListView;
-var
-  i, ToSelIndex: Integer;
-  ProjectInfo: TCnProjectInfo;
-  MatchSearchText: string;
-  IsMatchAny: Boolean;
-  ToSelUnitInfos: TList;
-
-  procedure DoAddProject(AProject: TCnProjectInfo);
-  var
-    i: Integer;
-    UnitInfo: TCnUnitInfo;
-  begin
-    for i := 0 to AProject.InfoList.Count - 1 do
-    begin
-      UnitInfo := TCnUnitInfo(AProject.InfoList[i]);
-      if (MatchSearchText = '') or RegExpContainsText(FRegExpr, UnitInfo.Name,
-        MatchSearchText, not IsMatchAny) then
-      begin
-        CurrList.Add(UnitInfo);
-        // 全匹配时，提高首匹配的优先级，记下第一个该首匹配的项以备选中
-        if IsMatchAny and AnsiStartsText(MatchSearchText, UnitInfo.Name) then
-          ToSelUnitInfos.Add(Pointer(UnitInfo));
-      end;
-    end;
-  end;
-
-begin
-{$IFDEF DEBUG}
-  CnDebugger.LogEnter('DoUpdateListView');
-{$ENDIF DEBUG}
-
-  ToSelIndex := 0;
-  ToSelUnitInfos := TList.Create;
-  try
-    CurrList.Clear;
-    MatchSearchText := edtMatchSearch.Text;
-    IsMatchAny := MatchAny;
-
-    if cbbProjectList.ItemIndex <= 0 then
-    begin
-      for i := 0 to ProjectList.Count - 1 do
-      begin
-        ProjectInfo := TCnProjectInfo(ProjectList[i]);
-        DoAddProject(ProjectInfo);
-      end;
-    end
-    else if cbbProjectList.ItemIndex = 1 then
-    begin
-      for i := 0 to ProjectList.Count - 1 do
-      begin
-        ProjectInfo := TCnProjectInfo(ProjectList[i]);
-        if _CnChangeFileExt(ProjectInfo.FileName, '') = CnOtaGetCurrentProjectFileNameEx then
-          DoAddProject(ProjectInfo);
-      end;
-    end
-    else
-    begin
-      for i := 0 to ProjectList.Count - 1 do
-      begin
-        ProjectInfo := TCnProjectInfo(ProjectList[i]);
-        if cbbProjectList.Items.Objects[cbbProjectList.ItemIndex] <> nil then
-          if TCnProjectInfo(cbbProjectList.Items.Objects[cbbProjectList.ItemIndex]).FileName
-            = ProjectInfo.FileName then
-            DoAddProject(ProjectInfo);
-      end;
-    end;
-
-    DoSortListView;
-
-    lvList.Items.Count := CurrList.Count;
-    lvList.Invalidate;
-
-    UpdateStatusBar;
-
-    // 如有需要选中的首匹配的项则选中，无则选 0，第一项
-    if (ToSelUnitInfos.Count > 0) and (CurrList.Count > 0) then
-    begin
-      for I := 0 to CurrList.Count - 1 do
-      begin
-        if ToSelUnitInfos.IndexOf(CurrList.Items[I]) >= 0 then
-        begin
-          // CurrList 中的第一个在 SelUnitInfos 里头的项
-          ToSelIndex := I;
-          Break;
-        end;
-      end;
-    end;
-    SelectItemByIndex(ToSelIndex);
-  finally
-    ToSelUnitInfos.Free;
-  end;
-{$IFDEF DEBUG}
-  CnDebugger.LogLeave('DoUpdateListView');
-{$ENDIF DEBUG}
-end;
 
 procedure TCnProjectOpenFileForm.UpdateStatusBar;
 begin
@@ -471,11 +500,11 @@ begin
   end;
 end;
 
-procedure TCnProjectOpenFileForm.DrawListItem(ListView: TCustomListView;
-  Item: TListItem);
+procedure TCnProjectOpenFileForm.DrawListPreParam(Item: TListItem;
+  ListCanvas: TCanvas);
 begin
-  if Assigned(Item) and TCnUnitInfo(Item.Data).IsOpened then
-    ListView.Canvas.Font.Color := clRed;
+  if Assigned(Item) and (Item.Data <> nil) and TCnUnitInfo(Item.Data).IsOpened then
+    ListCanvas.Font.Color := clGreen;
 end;
 
 procedure TCnProjectOpenFileForm.lvListData(Sender: TObject;
@@ -483,68 +512,22 @@ procedure TCnProjectOpenFileForm.lvListData(Sender: TObject;
 var
   Info: TCnUnitInfo;
 begin
-  if (Item.Index >= 0) and (Item.Index < CurrList.Count) then
+  if (Item.Index >= 0) and (Item.Index < DisplayList.Count) then
   begin
-    Info := TCnUnitInfo(CurrList[Item.Index]);
-    Item.Caption := Info.Name;
+    Info := TCnUnitInfo(DisplayList.Objects[Item.Index]);
+    Item.Caption := Info.Text;
     Item.ImageIndex := Info.ImageIndex;
     Item.Data := Info;
 
     with Item.SubItems do
     begin
-      Add(Info.Path);
+      Add(Info.RelPath);
       Add(IntToStrSp(Info.Size));
     end;
-    RemoveListViewSubImages(Item);
   end;
-end;
-
-var
-  _SortIndex: Integer;
-  _SortDown: Boolean;
-  _MatchStr: string;
-
-function DoListSort(Item1, Item2: Pointer): Integer;
-var
-  Info1, Info2: TCnUnitInfo;
-begin
-  Info1 := TCnUnitInfo(Item1);
-  Info2 := TCnUnitInfo(Item2);
-  
-  case _SortIndex of
-    0: Result := CompareTextPos(_MatchStr, Info1.Name, Info2.Name);
-    1: Result := CompareText(Info1.Path, Info2.Path);
-    2, 3: Result := CompareValue(Info1.Size, Info2.Size);
-  else
-    Result := 0;
-  end;
-
-  if _SortDown then
-    Result := -Result;
-end;
-
-procedure TCnProjectOpenFileForm.DoSortListView;
-var
-  Sel: Pointer;
-begin
-  if lvList.Selected <> nil then
-    Sel := lvList.Selected.Data
-  else
-    Sel := nil;
-
-  _SortIndex := SortIndex;
-  _SortDown := SortDown;
-  if MatchAny then
-    _MatchStr := edtMatchSearch.Text
-  else
-    _MatchStr := '';
-  CurrList.Sort(DoListSort);
-  lvList.Invalidate;
-
-  if Sel <> nil then
-    SelectItemByIndex(CurrList.IndexOf(Sel));
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
 end.
+
 
