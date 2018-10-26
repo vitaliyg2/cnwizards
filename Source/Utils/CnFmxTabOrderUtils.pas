@@ -395,6 +395,7 @@ procedure UpdateFMXDraw(Root: TComponent);
 var
   I: Integer;
 begin
+  Assert(Assigned(Root));
   for I := 0 to Root.ComponentCount - 1 do
     if Root.Components[I] is TControl then
       TControl(Root.Components[I]).Repaint;
