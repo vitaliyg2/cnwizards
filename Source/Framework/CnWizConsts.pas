@@ -1505,8 +1505,6 @@ var
   SCnProcListAllFileOpened: string = '<All Opened>';
   SCnProcListJumpIntfHint: string = 'Jump to Interface';
   SCnProcListJumpImplHint: string = 'Jump to Implementation';
-  SCnProcListClassComboHint: string = 'Class List';
-  SCnProcListProcComboHint: string = 'Procedure/Function List';
   SCnProcListSortMenuCaption: string = '&Sort';
   SCnProcListSortSubMenuByName: string = 'By &Name';
   SCnProcListSortSubMenuByLocation: string = 'By &Location';

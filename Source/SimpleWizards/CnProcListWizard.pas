@@ -1304,9 +1304,6 @@ begin
   Obj.ToolBtnJumpIntf.Hint := SCnProcListJumpIntfHint;
   Obj.ToolBtnJumpImpl.Hint := SCnProcListJumpImplHint;
 
-  Obj.ClassCombo.Hint := SCnProcListClassComboHint;
-  Obj.ProcCombo.Hint := SCnProcListProcComboHint;
-  
   Obj.PopupMenu.Items[0].Caption := SCnProcListSortMenuCaption;
 
     Obj.PopupMenu.Items[0].Items[0].Caption := SCnProcListSortSubMenuByName;
