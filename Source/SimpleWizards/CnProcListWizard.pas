@@ -1385,6 +1385,7 @@ var
   Obj: TCnProcToolBarObj;
   DotPos: Integer;
   S: string;
+  ClassStr, ProcStr: TCnIdeTokenString;
 begin
   Obj := GetToolBarObjFromEditControl(CnOtaGetCurrentEditControl);
   if Obj = nil then Exit;
@@ -1418,25 +1419,35 @@ begin
     EditView.ConvertPos(True, EditPos, CharPos);
 
     if not Obj.ClassCombo.Focused then
-      Obj.ClassCombo.SetTextWithoutChange(TCnIdeTokenString(FCurrPasParser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex)));
+    begin
+      ClassStr := TCnIdeTokenString(FCurrPasParser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex));
+      Obj.ClassCombo.SetTextWithoutChange(ClassStr);
+      Obj.ClassCombo.Hint := ClassStr;
+    end;
 
     if not Obj.ProcCombo.Focused then
     begin
       if FCurrPasParser.CurrentChildMethod <> '' then
-        Obj.ProcCombo.SetTextWithoutChange(TCnIdeTokenString(FCurrPasParser.CurrentChildMethod))
+        ProcStr := TCnIdeTokenString(FCurrPasParser.CurrentChildMethod)
       else if FCurrPasParser.CurrentMethod <> '' then
-        Obj.ProcCombo.SetTextWithoutChange(TCnIdeTokenString(FCurrPasParser.CurrentMethod))
+        ProcStr := TCnIdeTokenString(FCurrPasParser.CurrentMethod)
       else
-        Obj.ProcCombo.SetTextWithoutChange(SCnProcListNoContent);
+        ProcStr := SCnProcListNoContent;
+
+      Obj.ProcCombo.SetTextWithoutChange(ProcStr);
+      Obj.ProcCombo.Hint := ProcStr;
     end;
 
     if not Obj.ClassCombo.Focused and (Obj.ClassCombo.Text = '') then
     begin
-      DotPos := Pos('.', Obj.ProcCombo.Text);
+      DotPos := Pos('.', ProcStr);
       if DotPos > 1 then
-        Obj.ClassCombo.SetTextWithoutChange(Copy(Obj.ProcCombo.Text, 1, DotPos - 1))
+        ClassStr := Copy(ProcStr, 1, DotPos - 1)
       else
-        Obj.ClassCombo.SetTextWithoutChange(SCnProcListNoContent);
+        ClassStr := SCnProcListNoContent;
+
+      Obj.ClassCombo.SetTextWithoutChange(ClassStr);
+      Obj.ClassCombo.Hint := ClassStr;
     end;
   end
   else if FLanguage = ltCpp then
@@ -1455,26 +1466,35 @@ begin
     if not Obj.ClassCombo.Focused then
     begin
       if FCurrCppParser.CurrentClass <> '' then
-        Obj.ClassCombo.SetTextWithoutChange(TCnIdeTokenString(FCurrCppParser.CurrentClass))
+        ClassStr := TCnIdeTokenString(FCurrCppParser.CurrentClass)
       else
-        Obj.ClassCombo.SetTextWithoutChange(SCnProcListNoContent);
+        ClassStr := SCnProcListNoContent;
+
+      Obj.ClassCombo.SetTextWithoutChange(ClassStr);
+      Obj.ClassCombo.Hint := ClassStr;
     end;
 
     if not Obj.ProcCombo.Focused then
     begin
       if FCurrCppParser.CurrentMethod <> '' then
-        Obj.ProcCombo.SetTextWithoutChange(TCnIdeTokenString(FCurrCppParser.CurrentMethod))
+        ProcStr := TCnIdeTokenString(FCurrCppParser.CurrentMethod)
       else
-        Obj.ProcCombo.SetTextWithoutChange(SCnProcListNoContent);
+        ProcStr := SCnProcListNoContent;
+
+      Obj.ProcCombo.SetTextWithoutChange(ProcStr);
+      Obj.ProcCombo.Hint := ProcStr;
     end;
 
     if not Obj.ClassCombo.Focused and (Obj.ClassCombo.Text = '') then
     begin
-      DotPos := Pos('::', Obj.ProcCombo.Text);
+      DotPos := Pos('::', ProcStr);
       if DotPos > 1 then
-        Obj.ClassCombo.SetTextWithoutChange(Copy(Obj.ProcCombo.Text, 1, DotPos - 1))
+        ClassStr := Copy(ProcStr, 1, DotPos - 1)
       else
-        Obj.ClassCombo.SetTextWithoutChange(SCnProcListNoContent);
+        ClassStr := SCnProcListNoContent;
+
+      Obj.ClassCombo.SetTextWithoutChange(ClassStr);
+      Obj.ClassCombo.Hint := ClassStr;
     end;
   end;
 end;
