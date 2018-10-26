@@ -1663,8 +1663,6 @@ var
   SCnProcListJumpIntfHint: string = 'Jump to Interface';
   SCnProcListJumpImplHint: string = 'Jump to Implementation';
   SCnProcListJumpsHintFmt: string = 'Jump to %s';
-  SCnProcListClassComboHint: string = 'Class List';
-  SCnProcListProcComboHint: string = 'Procedure/Function List';
   SCnProcListSortMenuCaption: string = '&Sort';
   SCnProcListSortSubMenuByName: string = 'By &Name';
   SCnProcListSortSubMenuByLocation: string = 'By &Location';
