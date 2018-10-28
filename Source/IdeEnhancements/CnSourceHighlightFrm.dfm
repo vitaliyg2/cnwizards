@@ -13,6 +13,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     Top = 8
     Width = 361
     Height = 105
+    Anchors = [akLeft, akTop, akRight]
     Caption = 'Bracket High&Light'
     TabOrder = 0
     object lbl3: TLabel
@@ -20,6 +21,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 40
       Width = 60
       Height = 13
+      Alignment = taRightJustify
       Caption = 'Foreground:'
     end
     object shpBracket: TShape
@@ -34,6 +36,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 40
       Width = 60
       Height = 13
+      Alignment = taRightJustify
       Caption = 'Background:'
     end
     object shpBracketBk: TShape
@@ -44,10 +47,11 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       OnMouseDown = shpBracketMouseDown
     end
     object lbl5: TLabel
-      Left = 234
+      Left = 260
       Top = 40
       Width = 34
       Height = 13
+      Alignment = taRightJustify
       Caption = 'Frame:'
     end
     object shpBracketBd: TShape
@@ -117,6 +121,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     Top = 120
     Width = 361
     Height = 430
+    Anchors = [akLeft, akTop, akRight]
     Caption = 'Code &Structure Highlight'
     TabOrder = 1
     object shpBk: TShape
@@ -138,6 +143,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 57
       Width = 60
       Height = 13
+      Alignment = taRightJustify
       Caption = 'Foreground:'
     end
     object shpCurTokenFg: TShape
@@ -152,6 +158,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 57
       Width = 60
       Height = 13
+      Alignment = taRightJustify
       Caption = 'Background:'
     end
     object shpCurTokenBg: TShape
@@ -162,10 +169,11 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       OnMouseDown = shpBracketMouseDown
     end
     object lblCurTokenBd: TLabel
-      Left = 234
+      Left = 260
       Top = 57
       Width = 34
       Height = 13
+      Alignment = taRightJustify
       Caption = 'Frame:'
     end
     object shpCurTokenBd: TShape
@@ -232,6 +240,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 215
       Width = 181
       Height = 83
+      Anchors = [akLeft, akTop, akRight]
       Caption = 'Colors by &Level'
       TabOrder = 13
       object shpneg1: TShape
@@ -316,6 +325,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 303
       Width = 333
       Height = 85
+      Anchors = [akLeft, akTop, akRight]
       Caption = 'Highlight &Delay'
       Items.Strings = (
         'Immediately'
@@ -368,6 +378,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 397
       Width = 101
       Height = 22
+      Anchors = [akTop, akRight]
       Increment = 500
       MaxValue = 100000
       MinValue = 1000
