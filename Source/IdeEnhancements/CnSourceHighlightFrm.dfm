@@ -198,8 +198,8 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       OnMouseDown = shpBracketMouseDown
     end
     object lblCurrentTokenDelay: TLabel
-      Left = 26
-      Top = 83
+      Left = 146
+      Top = 387
       Width = 31
       Height = 13
       Caption = 'Delay:'
@@ -475,9 +475,9 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       TabOrder = 3
       OnClick = UpdateControls
     end
-    object seCurrentTokenDelay: TCnSpinEdit
-      Left = 88
-      Top = 80
+    object seCurrentTokenDelay: TSpinEdit
+      Left = 273
+      Top = 308
       Width = 73
       Height = 22
       Increment = 50
@@ -488,7 +488,6 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
   end
   object dlgColor: TColorDialog
-    Ctl3D = True
     Options = [cdFullOpen, cdAnyColor]
     Left = 335
     Top = 17
