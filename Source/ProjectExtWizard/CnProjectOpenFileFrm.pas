@@ -112,8 +112,13 @@ type
       Panel: TStatusPanel; const Rect: TRect);
     procedure lvListData(Sender: TObject; Item: TListItem);
     procedure tmrReadFilesTimer(Sender: TObject);
+    procedure cbbProjectListChange(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     FSearchPaths: TStringList;
+    FProjectInterfaceList: TInterfaceList;
+    FCurrentFindFileProjectInfo: TCnProjectInfo;
+    FCurrentFindFileProjectPath: string;
 
     procedure FillUnitInfo(AInfo: TCnUnitInfo);
     procedure DoFindFile(const aFileName: string; const Info: TSearchRec; var Abort: Boolean);
@@ -126,15 +131,14 @@ type
     procedure CreateList; override;
     procedure UpdateComboBox; override;
     procedure DrawListPreParam(Item: TListItem; ListCanvas: TCanvas); override;
-
+    
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer; MatchedIndexes: TList): Boolean; override;
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
       const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; override;
+    procedure UpdateDataList;
   public
     destructor Destroy; override;
-
-    { Public declarations }
   end;
 
 const
@@ -142,7 +146,7 @@ const
     ('Unknown', 'Project', 'Package', 'DataModule', 'Unit(Form)', 'Unit',
      'Asm ','C', 'H', 'RC');
   SNotSaved = 'Not Saved';
-  csViewUnits = 'ViewUnits';
+  csVGOpenFile = 'VGOpenFile';
 
   csUnitImageIndexs: array[TCnUnitType] of Integer =
     (26, 76, 77, 73, 67, 78, 79, 80, 81, 89); // 26 means unknown
@@ -160,7 +164,7 @@ implementation
 {$IFDEF DEBUG}
 uses
   CnDebug;
-{$ENDIF DEBUG}
+{$ENDIF}
 
 { TCnProjectViewUnitsForm }
 
@@ -170,16 +174,31 @@ begin
   begin
     try
       ShowHint := WizOptions.ShowHint;
-      LoadSettings(Ini, csViewUnits);
+      LoadSettings(Ini, csVGOpenFile);
       Result := ShowModal = mrOk;
       Hooked := actHookIDE.Checked;
-      SaveSettings(Ini, csViewUnits);
+      SaveSettings(Ini, csVGOpenFile);
       if Result then
         BringIdeEditorFormToFront;
     finally
       Free;
     end;
   end;
+end;
+
+function FindProject(const aProjectList: TInterfaceList; const aProjectFileName: string; out aProject: IOTAProject): Boolean;
+var
+  i: Integer;
+begin
+  Assert(Assigned(aProjectList));
+  for i := 0 to aProjectList.Count - 1 do
+  begin
+    aProject := IOTAProject(aProjectList[i]);
+    Result := SameText(aProject.FileName, aProjectFileName);
+    if Result then
+      Exit;
+  end;
+  Result := False;
 end;
 
 //==============================================================================
@@ -213,7 +232,13 @@ begin
         if SortDown then
           Result := -Result;
       end;
-    3, 4:
+    3:
+      begin
+        Result := CompareText(SUnitTypes[Info1.UnitType], SUnitTypes[Info2.UnitType]);
+        if SortDown then
+          Result := -Result;
+      end;
+    4:
       begin
         Result := CompareText(Info1.Project, Info2.Project);
         if SortDown then
@@ -258,6 +283,49 @@ begin
       end;
   end;
 end;
+
+procedure TCnProjectOpenFileForm.cbbProjectListChange(Sender: TObject);
+begin
+  inherited;
+  UpdateDataList;
+end;
+
+procedure TCnProjectOpenFileForm.UpdateDataList;
+  procedure ProcessProject(const aProjectInfo: TCnProjectInfo);
+  var
+    IProject: IOTAProject;
+    LSearchPaths: TStringList;
+    i: Integer;
+  begin
+    if not FindProject(FProjectInterfaceList, aProjectInfo.FileName, IProject) then
+      Exit;
+
+    LSearchPaths := TStringList.Create;
+    try
+      GetSearchPath(IProject, LSearchPaths);
+      for I := 0 to LSearchPaths.Count - 1 do
+        if FSearchPaths.IndexOf(LSearchPaths[i]) = -1 then
+          FSearchPaths.AddObject(LSearchPaths[i], aProjectInfo);
+    finally
+      FreeAndNil(LSearchPaths);
+    end;
+  end;
+var
+  i: Integer;
+begin
+  ClearDataList;
+  FSearchPaths.Clear;
+  if Assigned(ProjectInfoSearch) then
+    ProcessProject(ProjectInfoSearch)
+  else
+    for I := 0 to ProjectList.Count - 1 do
+      ProcessProject(TCnProjectInfo(ProjectList[I]));
+
+  tmrReadFiles.Enabled := True;
+
+  inherited;
+end;
+
 function TCnProjectOpenFileForm.DoSelectOpenedItem: string;
 var
   CurrentModule: IOTAModule;
@@ -305,6 +373,18 @@ begin
   AInfo.ImageIndex := csUnitImageIndexs[AInfo.UnitType];
 end;
 
+procedure TCnProjectOpenFileForm.FormCreate(Sender: TObject);
+begin
+  FSearchPaths := TStringList.Create;
+  FSearchPaths.Sorted := True;
+  FSearchPaths.Duplicates := dupIgnore;
+  FSearchPaths.CaseSensitive := False;
+
+  FProjectInterfaceList := TInterfaceList.Create;
+
+  inherited;
+end;
+
 procedure TCnProjectOpenFileForm.OpenSelect;
 var
   Item: TListItem;
@@ -330,13 +410,13 @@ var
 
   procedure OpenSelectedItem;
   var
-    i: Integer;
+    I: Integer;
   begin
     BeginBatchOpenClose;
     try
-      for i := 0 to Pred(lvList.Items.Count) do
-        if lvList.Items.Item[i].Selected then
-          OpenItem(TCnUnitInfo(lvList.Items.Item[i].Data).FileName);
+      for I := 0 to Pred(lvList.Items.Count) do
+        if lvList.Items.Item[I].Selected then
+          OpenItem(TCnUnitInfo(lvList.Items.Item[I].Data).FileName);
     finally
       EndBatchOpenClose;
     end;
@@ -382,22 +462,14 @@ end;
 
 procedure TCnProjectOpenFileForm.tmrReadFilesTimer(Sender: TObject);
 begin
-  if not Assigned(FSearchPaths) then
-  begin
-    FSearchPaths := TStringList.Create;
-    FSearchPaths.Sorted := True;
-    FSearchPaths.Duplicates := dupIgnore;
-    FSearchPaths.CaseSensitive := False;
-
-    GetSearchPath(CnOtaGetCurrentProject, FSearchPaths);
-  end;
-
   if (FSearchPaths.Count = 0) then
   begin
     tmrReadFiles.Enabled := False;
     Exit;
   end;
 
+  FCurrentFindFileProjectInfo := TCnProjectInfo(FSearchPaths.Objects[0]);
+  FCurrentFindFileProjectPath := _CnExtractFilePath(FCurrentFindFileProjectInfo.FileName);
   FindFile(MakePath(FSearchPaths[0]), '*.*', DoFindFile, nil, False, False);
   FSearchPaths.Delete(0);
   UpdateListView;
@@ -406,12 +478,12 @@ end;
 destructor TCnProjectOpenFileForm.Destroy;
 begin
   FreeAndNil(FSearchPaths);
+  FreeAndNil(FProjectInterfaceList);
   inherited;
 end;
 
 procedure TCnProjectOpenFileForm.DoFindFile(const aFileName: string; const Info: TSearchRec; var Abort: Boolean);
 var
-  ProjectInfo: TCnProjectInfo;
   UnitInfo: TCnUnitInfo;
 begin
   if not (IsSourceModule(aFileName) or IsRC(aFileName) or
@@ -419,14 +491,14 @@ begin
   then
     Exit;
 
-  ProjectInfo := TCnProjectInfo(ProjectList[0]);
   UnitInfo := TCnUnitInfo.Create;
   with UnitInfo do
   begin
     Text := _CnChangeFileExt(_CnExtractFileName(aFileName), '');
     FileName := aFileName;
     RelPath := GetRelativePath(_CnExtractFilePath(aFileName),
-      _CnExtractFilePath(ProjectInfo.FileName));
+      FCurrentFindFileProjectPath);
+    UnitInfo.Project := FCurrentFindFileProjectInfo.Name;
 
   {$IFDEF SUPPORT_MODULETYPE}
     // todo: Check ModuleInfo.ModuleType
@@ -453,20 +525,45 @@ begin
   end;
 
   FillUnitInfo(UnitInfo);
-  UnitInfo.ParentProject := ProjectInfo;
+  UnitInfo.ParentProject := FCurrentFindFileProjectInfo;
   DataList.AddObject(UnitInfo.Text, UnitInfo);
 end;
 
 procedure TCnProjectOpenFileForm.CreateList;
 var
   ProjectInfo: TCnProjectInfo;
+  UnitInfo: TCnUnitInfo;
+  I, J: Integer;
+  UnitFileName: string;
   IProject: IOTAProject;
+  IModuleInfo: IOTAModuleInfo;
+{$IFDEF BDS}
+  ProjectGroup: IOTAProjectGroup;
+{$ENDIF}
 begin
-  IProject := CnOtaGetCurrentProject;
-  ProjectInfo := TCnProjectInfo.Create;
-  ProjectInfo.Name := _CnExtractFileName(IProject.FileName);
-  ProjectInfo.FileName := IProject.FileName;
-  ProjectList.Add(ProjectInfo);
+  FProjectInterfaceList.Clear;
+  CnOtaGetProjectList(FProjectInterfaceList);
+    for I := 0 to FProjectInterfaceList.Count - 1 do
+    begin
+      IProject := IOTAProject(FProjectInterfaceList[I]);
+
+      if IProject.FileName = '' then
+        Continue;
+
+{$IFDEF BDS}
+      // BDS 后，ProjectGroup 也支持 Project 接口，因此需要去掉
+      if Supports(IProject, IOTAProjectGroup, ProjectGroup) then
+        Continue;
+{$ENDIF}
+
+      ProjectInfo := TCnProjectInfo.Create;
+      ProjectInfo.Name := _CnExtractFileName(IProject.FileName);
+      ProjectInfo.FileName := IProject.FileName;
+
+      ProjectList.Add(ProjectInfo);  // ProjectList 中只包含工程信息
+    end;
+
+    UpdateDataList;
 end;
 
 procedure TCnProjectOpenFileForm.UpdateComboBox;
@@ -523,6 +620,8 @@ begin
     begin
       Add(Info.RelPath);
       Add(IntToStrSp(Info.Size));
+      Add(SUnitTypes[Info.UnitType]);
+      Add(Info.Project);
     end;
   end;
 end;
