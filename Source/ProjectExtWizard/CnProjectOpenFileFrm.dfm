@@ -66,6 +66,7 @@ inherited CnProjectOpenFileForm: TCnProjectOpenFileForm
     end
   end
   object tmrReadFiles: TTimer
+    Enabled = False
     Interval = 100
     OnTimer = tmrReadFilesTimer
     Left = 408
