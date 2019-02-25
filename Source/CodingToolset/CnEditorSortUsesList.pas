@@ -56,7 +56,7 @@ type
     function ProcessText(const Text: string): string; override;
     function GetStyle: TCnCodeToolStyle; override;
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
     procedure GetEditorInfo(var Name, Author, Email: string); override;
@@ -99,7 +99,7 @@ type
 
 { TCnEditorSortUsesList }
 
-constructor TCnEditorSortUsesList.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorSortUsesList.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
   ValidInSource := False;
@@ -382,7 +382,7 @@ begin
 end;
 
 initialization
-  RegisterCnEditor(TCnEditorSortUsesList);
+  RegisterCnCodingToolset(TCnEditorSortUsesList);
 
 {$ENDIF CNWIZARDS_CNEDITORWIZARD}
 end.
