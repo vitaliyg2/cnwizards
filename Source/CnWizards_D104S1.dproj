@@ -520,6 +520,9 @@
             <Form>CnImportDirForm</Form>
         </DCCReference>
         <DCCReference Include="Utils\CnDCU32.pas"/>
+        <DCCReference Include="CodingToolset\CnEditorSortUsesList.pas"/>
+        <DCCReference Include="SimpleWizards\CnUnitsDependency.pas"/>
+        <DCCReference Include="SimpleWizards\CnUnitsDependencyFrm.pas"/>
         <DCCReference Include="UsesWizard\CnUsesToolsWizard.pas">
             <Form>CnUsesCleanerForm</Form>
         </DCCReference>
