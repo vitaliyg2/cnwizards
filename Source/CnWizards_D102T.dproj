@@ -344,6 +344,9 @@
         <DCCReference Include="ProjectExtWizard\CnProjectViewFormsFrm.pas">
             <Form>CnProjectViewFormsForm</Form>
         </DCCReference>
+        <DCCReference Include="ProjectExtWizard\CnProjectOpenFileFrm.pas">
+            <Form>CnProjectOpenFileForm</Form>
+        </DCCReference>
         <DCCReference Include="ProjectExtWizard\CnProjectUseUnitsFrm.pas">
             <Form>CnProjectViewUnitsForm</Form>
         </DCCReference>
@@ -550,6 +553,11 @@
         <DCCReference Include="Utils\CnImageProviderIconFinder.pas"/>
         <DCCReference Include="Utils\CnImageProviderFindIcons.pas"/>
         <DCCReference Include="Utils\CnImageProviderLocalCache.pas"/>
+        <DCCReference Include="EditorWizard\CnEditorSortUsesList.pas"/>
+        <DCCReference Include="SimpleWizards\CnUnitsDependency.pas"/>
+        <DCCReference Include="SimpleWizards\CnUnitsDependencyFrm.pas">
+            <Form>CnUnitsDependecyForm</Form>
+        </DCCReference>
         <DCCReference Include="CodeFormatter\CnFormatterIntf.pas"/>
         <DCCReference Include="CodeFormatter\CnCodeFormatterWizard.pas">
             <Form>CnCodeFormatterForm</Form>

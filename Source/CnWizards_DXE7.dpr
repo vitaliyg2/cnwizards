@@ -143,6 +143,7 @@ uses
   CnProjectUseUnitsFrm in 'ProjectExtWizard\CnProjectUseUnitsFrm.pas' {CnProjectViewUnitsForm},
   CnProjectFramesFrm in 'ProjectExtWizard\CnProjectFramesFrm.pas' {CnProjectFramesForm},
   CnProjectListUsedFrm in 'ProjectExtWizard\CnProjectListUsedFrm.pas' {CnProjectListUsedForm},
+  CnProjectOpenFileFrm in 'ProjectExtWizard\CnProjectOpenFileFrm.pas' {CnProjectOpenFileFrm},
   CnWizDfmParser in 'Utils\CnWizDfmParser.pas',
   CnVclToFmxIntf in 'VclToFmx\CnVclToFmxIntf.pas',
   CnCommentCropper in 'SimpleWizards\CnCommentCropper.pas' {CnCommentCropForm},
