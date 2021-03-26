@@ -28,37 +28,50 @@ freely, subject to the following restrictions:
 *)
 interface
 
-{$I CnPack.inc}
-
 uses
-  SysUtils,Classes,DCU32,DCP, CnCommon;
+  SysUtils,Classes,DCU32,DCP{$IFDEF Win32},Windows{$ENDIF},IniFiles;
 
 const
   PathSep = {$IFNDEF LINUX}';'{$ELSE}':'{$ENDIF};
   DirSep = {$IFNDEF LINUX}'\'{$ELSE}'/'{$ENDIF};
-  PkgSep = '@';
 
 var
-  DCUPath: String='';
+  DCUPath: String='*'; {To disable LIB directory autodetection use -U flag}
   PASPath: String='*' {Let only presence of -P signals, that source lines are required};
+  LibConfigFN: String = ''; //For autodetection
+  PreferDebugLib: Boolean = false; //For autodetection
+  TopLevelUnitClass: TUnitClass = TUnit;
+  IgnoreUnitStamps: Boolean = true;
 
-function GetDCUByName(FName,FExt: String; VerRq: integer; MSILRq: boolean; StampRq: integer): TUnit;
+function ExtractFileNamePkg(const FN: String): String;
+
+function GetDCUByName(FName,FExt: String; VerRq: integer; MSILRq: boolean;
+  PlatformRq: TDCUPlatform; StampRq: integer): TUnit;
+
+function GetDCUOfMemory(MemP: Pointer): TUnit;
 
 procedure FreeDCU;
 
-procedure LoadSourceLines(FName: String; Lines: TStrings);
+procedure LoadSourceLines(const FName: String; Lines: TStrings);
 
-procedure SetUnitAliases(V: String);
+procedure SetUnitAliases(const V: String);
+
+function IsDCPName(const S: String): Boolean;
+
+function LoadPackage(const FName: String; IsMain: Boolean): TDCPackage;
+
+const
+  PkgSep = '@';
 
 implementation
 
 {const
   PkgErr = Pointer(1);}
-
 var
   PathList: TStringList = Nil;
   FUnitAliases: TStringList = Nil;
   AddedUnitDirToPath: boolean = false;
+  AutoLibDirNDX: Integer = -1;
 
 procedure FreePackages;
 var
@@ -73,14 +86,202 @@ begin
       Continue;}
     Pkg.Free;
   end ;
+  //PathList.Clear;
+  PathList.Free;
+  PathList := Nil;
+end ;
+
+function ExtractFileNamePkg(const FN: String): String;
+{Extract file name for packaged or normal files}
+var
+  CP: PChar;
+begin
+  Result := ExtractFileName(FN);
+  CP := StrScan(PChar(Result),PkgSep);
+  if CP<>Nil then
+    Result := StrPas(CP+1);
+end ;
+
+function GetVerTag(Ver: integer): String;
+const
+  sVerName: array[2..MaxDelphiVer]of String = (
+    'D2',
+    'D3',
+    'D4',
+    'D5',
+    'D6',
+    'D7',
+    'D8',
+    'D2005', //2005
+    'D2006', //2006
+    '',
+    'D2009', //2009
+    '',
+    'D2010', //2010
+    'XE', //XE
+    'XE2', //XE2
+    'XE3', //XE3
+    'XE4', //XE4
+    'XE5', //XE5
+    'XE6', //XE6
+    'XE7', //XE7&AppMethod
+    'XE8', //XE8
+    '10Seattle', //10 Seattle
+    '10_1Berlin', //10.1 Berlin
+    '10_2Tokyo', //10.2 Tokyo
+    '10_3Rio' //10.3 Rio
+  );
+begin
+  if Ver<verK1 then
+    Result := sVerName[Ver]
+  else
+    Result := Format('K%d',[Ver-verK1+1]);
+end ;
+
+function GetPlatformTag(IsMSIL: boolean; Platf: TDCUPlatform): String;
+const
+  platfSymbol: array[TDCUPlatform]of String = ('','64','X',
+    'iOSSim','iOSDev','iOSDev64','Android','Linux64');
+begin
+  if IsMSIL then
+    Result := 'N'
+  else
+    Result := platfSymbol[Platf];
+end ;
+
+function GetCfgLibDir(VerRq: integer; MSILRq: boolean; PlatformRq: TDCUPlatform): String;
+var
+  sKey,S: String;
+  KeyCh: Char;
+  IniF: TIniFile;
+begin
+  Result := '';
+  if LibConfigFN='' then
+    Exit;
+  if VerRq<0 then
+    Exit;
+  if not FileExists(LibConfigFN) then
+    Exit;
+  if PreferDebugLib then
+    KeyCh := 'D'
+  else
+    KeyCh := 'R';
+  sKey := GetVerTag(VerRq)+'_'+GetPlatformTag(MSILRq,PlatformRq)+KeyCh;
+  try
+    IniF := TIniFile.Create(LibConfigFN);
+    try
+      Result := IniF.ReadString('LIBS',sKey,'');
+      if Result='' then
+        Exit;
+      Result := ExtractFilePath(Result);
+      if ExtractFileDrive(Result)<>'' then
+        Exit;
+      S := IniF.ReadString('CFG','LIBROOT','');
+      if S<>'' then
+        S := S+DirSep
+      else
+        S := ExtractFilePath(LibConfigFN);
+      Result := S+Result;
+    finally
+      IniF.Free;
+    end ;
+  except
+    Result := '';
+  end ;
+end ;
+
+function GetDelphiLibDir(VerRq: integer; MSILRq: boolean; PlatformRq: TDCUPlatform): String;
+{ Delphi LIB directory autodetection }
+{$IFDEF Win32}
+const
+  sRoot = 'RootDir';
+  sPlatformDir: array[TDCUPlatform]of String = ('win32','win64','osx32','iOSSimulator',
+    'iOSDevice','iOSDevice64','android','linux64');
+var
+  Key: HKey;
+  sPath,sRes,sLib: String;
+  DataType, DataSize: Integer;
+{$ENDIF}
+begin
+  Result := GetCfgLibDir(VerRq,MSILRq,PlatformRq);
+  if Result<>'' then
+    Exit;
+ {$IFDEF Win32}
+  sPath := '';
+  sLib := 'Lib';
+  case VerRq of
+   verD2..verD7: sPath := Format('SOFTWARE\Borland\Delphi\%d.0',[VerRq]);
+   verD8: sPath := 'SOFTWARE\Borland\BDS\2.0';
+   verD2005: sPath := 'SOFTWARE\Borland\BDS\3.0';
+   verD2006: sPath := 'SOFTWARE\Borland\BDS\4.0';
+  // verD2007: sPath := 'SOFTWARE\Borland\BDS\5.0'; This version was not detected
+   verD2009: sPath := 'SOFTWARE\CodeGear\BDS\6.0';
+   verD2010: sPath := 'SOFTWARE\CodeGear\BDS\7.0';
+   verD_XE: sPath := 'SOFTWARE\Embarcadero\BDS\8.0';
+   verD_XE2: sPath := 'SOFTWARE\Embarcadero\BDS\9.0';
+   verD_XE3: sPath := 'SOFTWARE\Embarcadero\BDS\10.0';
+   verD_XE4: sPath := 'SOFTWARE\Embarcadero\BDS\11.0';
+   verD_XE5: sPath := 'SOFTWARE\Embarcadero\BDS\12.0';
+   //verAppMethod: sPath := 'SOFTWARE\Embarcadero\BDS\13.0'; == verD_XE7
+   verD_XE6: sPath := 'SOFTWARE\Embarcadero\BDS\14.0';
+   verD_XE7: sPath := 'SOFTWARE\Embarcadero\BDS\15.0';
+   verD_XE8: sPath := 'SOFTWARE\Embarcadero\BDS\16.0';
+   verD_10: sPath := 'SOFTWARE\Embarcadero\BDS\17.0';
+   verD_10_1: sPath := 'SOFTWARE\Embarcadero\BDS\18.0';
+   verD_10_2: sPath := 'SOFTWARE\Embarcadero\BDS\19.0';
+   verD_10_3: sPath := 'SOFTWARE\Embarcadero\BDS\20.0';
+  else
+    Exit;
+  end ;
+  if RegOpenKeyEx(HKEY_CURRENT_USER, PChar(sPath), 0, KEY_READ, Key)<>ERROR_SUCCESS then
+    if RegOpenKeyEx(HKEY_LOCAL_MACHINE, PChar(sPath), 0, KEY_READ, Key)<>ERROR_SUCCESS then
+      Exit;
+  try
+    if RegQueryValueEx(Key, sRoot, nil, @DataType, nil, @DataSize)<>ERROR_SUCCESS then
+      Exit;
+    if DataType<>REG_SZ then
+      Exit;
+    if DataSize<=SizeOf(Char) then
+      Exit;
+    SetString(sRes, nil, (DataSize div SizeOf(Char)) - 1);
+    if RegQueryValueEx(Key, sRoot, nil, @DataType, PByte(sRes), @DataSize) <> ERROR_SUCCESS then
+      Exit;
+  finally
+    RegCloseKey(Key);
+  end ;
+  if sRes[Length(sRes)]<>DirSep then
+    sRes := sRes+DirSep;
+  if (VerRq>=verD_XE)and(VerRq<verK1) then begin
+    sLib := 'lib'+DirSep+sPlatformDir[PlatformRq]+DirSep;
+    if PreferDebugLib then
+      sLib := sLib+'debug'
+    else
+      sLib := sLib+'release';
+   end
+  else if PreferDebugLib and(VerRq>verD4) then
+    sLib := sLib+DirSep+'debug';
+  Result := sRes+sLib+DirSep;
+ {$ENDIF}
+end ;
+
+function IsDCPName(const S: String): Boolean;
+var
+  Ext: String;
+begin
+  Ext := ExtractFileExt(S);
+  Result := (CompareText(Ext,'.dcp')=0)or(CompareText(Ext,'.dcpil')=0);
 end ;
 
 function AddToPathList(S: String; SurePkg: boolean): integer;
 begin
+  if S='' then begin
+    Result := -1;
+    Exit;
+  end ;
   Result := PathList.IndexOf(S);
   if Result>=0 then
     Exit; {It may be wrong on Unix}
-  if SurePkg or (CompareText(_CnExtractFileExt(S),'.dcp')=0) then begin
+  if SurePkg or IsDCPName(S) then begin
     if FileExists(S) then begin
       Result := PathList.AddObject(S,TDCPackage.Create);
       Exit;
@@ -89,20 +290,36 @@ begin
     if SurePkg then
       Exit;
   end ;
-  if not (
-  {$IFDEF UNICODE}
-  CharInSet(AnsiLastChar(S)^, [{$IFNDEF Linux}':',{$ENDIF} DirSep])
-  {$ELSE}
-  AnsiLastChar(S)^ in [{$IFNDEF Linux}':',{$ENDIF} DirSep]
-  {$ENDIF}
-  ) then
+  if not (AnsiLastChar(S)^ in [{$IFNDEF Linux}':',{$ENDIF} DirSep]) then
     S := S + DirSep;
   Result := PathList.Add(S);
 end ;
 
-procedure SetPathList(DirList: string);
+procedure FindPackagesAndAddToPathList(const Mask: String);
 var
-  I, P, L: Integer;
+  SR: TSearchRec;
+  Path,Ext: String;
+  lExt: Integer;
+begin
+  Ext := ExtractFileExt(Mask);
+  lExt := Length(Ext);
+  if SysUtils.FindFirst(Mask, faAnyFile, sr)<>0 then
+    Exit;
+  Path := ExtractFilePath(Mask);
+  repeat
+    if (sr.Attr and faDirectory)=0 then begin
+      Ext := ExtractFileExt(sr.Name);
+      if Length(Ext)=lExt then //Check that we don`t have .dcpil instead of .dcp
+        AddToPathList(Path+sr.Name,true{SurePkg});
+    end ;
+  until FindNext(sr) <> 0;
+end ;
+
+procedure SetPathList(const DirList: string);
+var
+  I, P, L,hDir: Integer;
+  sDir: String;
+  CP: PChar;
 begin
   P := 1;
   L := Length(DirList);
@@ -114,17 +331,21 @@ begin
       Break;
     I := P;
     while (P <= L) and (DirList[P] <> PathSep) do begin
-      if
-      {$IFDEF UNICODE}
-      CharInSet(DirList[P], LeadBytes)
-      {$ELSE}
-      DirList[P] in LeadBytes
-      {$ENDIF}
-      then
+      if DirList[P] in LeadBytes then
         Inc(P);
       Inc(P);
     end;
-    AddToPathList(Copy(DirList, I, P-I),False{SurePkg});
+    sDir := Copy(DirList, I, P-I);
+    if sDir='' then
+      Continue {Paranoic};
+    CP := PChar(sDir);
+    if ((StrScan(CP,'*')<>Nil)or(StrScan(CP,'?')<>Nil))and IsDCPName(sDir) then begin
+      FindPackagesAndAddToPathList(sDir);
+      Continue;
+    end ;
+    hDir := AddToPathList(sDir,False{SurePkg});
+    if sDir='*' then
+      AutoLibDirNDX := hDir; //Mark the place to add the directory from registry
   end;
 end;
 
@@ -179,7 +400,7 @@ begin
   FillChar(SR,SizeOf(TDCUSearchRec),0);
   SR.FN := FN;
   SR.hPath := -1;
-  Dir := _CnExtractFileDir(FN);
+  Dir := ExtractFileDir(FN);
   Result := Dir<>'';
   AddedUnitDir := AddedUnitDirToPath;
   if not AddedUnitDirToPath then begin
@@ -192,17 +413,18 @@ begin
     AddedUnitDirToPath := true;
   end ;
   CP := PChar(FN)+Length(Dir);
-  CP := StrScan(CP,PkgSep);
+  CP := StrScan(CP+1,PkgSep);
   if CP<>Nil then begin
     SetLength(FN,CP-PChar(FN)); //Package name with path
     SR.hPath := AddToPathList(FN,true{SurePkg});
     if SR.hPath>=0 then
       SR.UnitName := StrPas(CP+1);
-    SR.UnitName := _CnChangeFileExt(SR.UnitName,'');
+    SR.UnitName := ChangeFileExt(SR.UnitName,'');
     Exit;
   end ;
-  {if _CnExtractFileExt(SR.FN)='' then
+  {if ExtractFileExt(SR.FN)='' then
     SR.FN := SR.FN+'.dcu';}
+  SR.UnitName := ExtractFileName(SR.FN);
   SR.FN := SR.FN+FExt;
  (*
   if (DCUPath='') then
@@ -238,15 +460,17 @@ begin
     Pkg := TDCPackage(PathList.Objects[SR.hPath]);
     Inc(SR.hPath);
     if Pkg=Nil then begin
+      if S='*'+DirSep then
+        Exit;
       Result := S+SR.FN;
       if FileExists(Result) then
         Exit;
       Result := '';
      end
-    else if Pkg.Load(S) then begin
+    else if Pkg.Load(S,false) then begin
       SR.Res := Pkg.GetFileByName(SR.UnitName);
       if SR.Res<>Nil then
-        Result := S+'@'+SR.UnitName;
+        Result := S+PkgSep+SR.UnitName+ExtractFileExt(SR.FN);
     end ;
   end ;
 end ;
@@ -264,7 +488,7 @@ begin
   Result := UnitList;
 end ;
 
-procedure RegisterUnit(Name: String; U: TUnit);
+procedure RegisterUnit(const Name: String; U: TUnit);
 var
   UL: TStringList;
 begin
@@ -272,30 +496,60 @@ begin
   UL.AddObject(Name,U);
 end ;
 
-function GetDCUByName(FName,FExt: String; VerRq: integer; MSILRq: boolean; StampRq: integer): TUnit;
+procedure NeedPathList;
+begin
+  if PathList=Nil then begin
+    PathList := TStringList.Create;
+    SetPathList(DCUPath);
+  end ;
+end;
+
+function GetDCUByName(FName,FExt: String; VerRq: integer; MSILRq: boolean;
+  PlatformRq: TDCUPlatform; StampRq: integer): TUnit;
 var
   UL: TStringList;
   NDX: integer;
   U0: TUnit;
 //  SearchPath: String;
   SR: TDCUSearchRec;
-  FN: String;
+  FN,UnitName: String;
+  HasPath: Boolean;
+  Cl: TUnitClass;
 begin
   UL := GetUnitList;
-  if PathList=Nil then begin
-    PathList := TStringList.Create;
-    SetPathList(DCUPath);
+  NeedPathList;
+  if (AutoLibDirNDX>=0)and(VerRq>0) then begin
+    FN := GetDelphiLibDir(VerRq,MSILRq,PlatformRq);
+    if (FN<>'')and(PathList.IndexOf(FN)>=0) then
+      FN := '';
+    if FN='' then
+      PathList.Delete(AutoLibDirNDX)
+    else begin
+      PathList[AutoLibDirNDX] := FN;
+      Writeln('Using Delphi lib: ',FN);
+    end ;
+    AutoLibDirNDX := -1; //Substitution for * had been made
   end ;
   {if not AddedUnitDirToPath then begin
     AddUnitDirToPath(FName);
     AddedUnitDirToPath := true;
   end ;}
-  if FUnitAliases<>Nil then begin
-    FN := FUnitAliases.Values[FName];
-    if FN<>'' then
-      FName := FN;
+  UnitName := ExtractFileNamePkg(FName);
+  HasPath := Length(UnitName)<Length(FName);
+  if HasPath or(FExt=''{FExt is not empty for the units from uses})  then
+    UnitName := ChangeFileExt(UnitName,'');
+  if not HasPath and(FUnitAliases<>Nil) then begin
+    FN := FUnitAliases.Values[UnitName{FName}];
+    if FN<>'' then begin
+      UnitName{FName} := FN;
+      FName{FName} := FN;
+    end ;
   end ;
-  if UL.Find(FName,NDX) then
+  if IgnoreUnitStamps or not((VerRq>verD2){In Delphi 2.0 Stamp is not used}and
+    (VerRq<=verD7){The higher versions ignore the value too}or(VerRq>=verK1))
+  then
+    StampRq := 0;
+  if UL.Find(UnitName{FName},NDX) then
     Result := TUnit(UL.Objects[NDX])
   else begin
     InitDCUSearch(FName,FExt,SR);
@@ -307,17 +561,24 @@ begin
       repeat
         FName := FindDCU(SR);
         if FName<>'' then begin
-          Result := TUnit.Create;
+          if VerRq=0 then
+            Cl := TopLevelUnitClass
+          else
+            Cl := TUnit;
+          Result := Cl.Create;
           try
-            if Result.Load(FName,VerRq,MSILRq,SR.Res) then
-              break;
+            if Result.Load(FName,VerRq,MSILRq,PlatformRq,SR.Res) then begin
+              if (StampRq=0)or(StampRq=Result.Stamp)
+              then {Let`s check it here to try to find the correct stamp somewhere else}
+                break;
+            end;
           except
             on E: Exception do begin
               if VerRq=0 then //Main Unit => reraise;
                 raise;
             //The unit with the required version found, but it was wrong.
             //Report the problem and stop the search
-              Writeln(Format('%s: %s',[E.ClassName,E.Message]));
+              Writeln(Format('!!!%s: %s',[E.ClassName,E.Message]));
               Result.Free;
               Result := Nil;
               break;
@@ -328,7 +589,7 @@ begin
         end ;
       until SR.hPath<0;
       if Result<>Nil then
-        RegisterUnit(Result.UnitName, Result)
+        RegisterUnit(UnitName{Result.UnitName - some units in packages may have different source file name}, Result)
       else
         RegisterUnit(FN, Nil); //Means: don't seek this name again,
           //It's supposed that FName is a unit name without path
@@ -338,11 +599,33 @@ begin
   end ;
   if Result=Nil then
     Exit;
-  if (VerRq>2){In Delphi 2.0 Stamp is not used}and(StampRq<>0)
-    and(StampRq<>Result.Stamp)
-  then
+  if (StampRq<>0)and(StampRq<>Result.Stamp) then
     Result := Nil;
 end ;
+
+function GetDCUOfMemory(MemP: Pointer): TUnit;
+var
+  UL: TStringList;
+  U: TUnit;
+  i: Integer;
+begin
+  if MemP<>Nil then begin
+    if (CurUnit<>Nil)and CurUnit.IsValidMemPtr(MemP) then begin
+      Result := CurUnit;
+      Exit;
+    end ;
+    UL := GetUnitList;
+    for i:=0 to UL.Count-1 do begin
+      U := TUnit(UL.Objects[i]);
+      if (U<>Nil)and U.IsValidMemPtr(MemP) then begin
+        Result := U;
+        Exit;
+      end ;
+    end ;
+  end ;
+  Result := Nil;
+end ;
+
 
 procedure FreeDCU;
 var
@@ -368,18 +651,18 @@ begin
     Result := '';
     Exit;
   end ;
-  S := _CnExtractFilePath(FName);
+  S := ExtractFilePath(FName);
   if S<>'' then begin
     if FileExists(FName) then begin
       Result := FName;
       Exit;
     end ;
-    FName := _CnExtractFileName(FName);
+    FName := ExtractFileName(FName);
   end ;
   Result := FileSearch(FName,PASPath);
 end ;
 
-procedure LoadSourceLines(FName: String; Lines: TStrings);
+procedure LoadSourceLines(const FName: String; Lines: TStrings);
 var
   S: String;
 begin
@@ -389,11 +672,13 @@ begin
   Lines.LoadFromFile(S);
 end ;
 
-procedure SetUnitAliases(V: String);
+procedure SetUnitAliases(const V: String);
 var
   CP,EP,NP: PChar;
   S: String;
 begin
+  if FUnitAliases<>Nil then
+    FUnitAliases.Clear;
   if V='' then
     Exit;
   if FUnitAliases=Nil then
@@ -413,6 +698,22 @@ begin
     CP := NP;
   until CP=Nil;
 end ;
+
+function LoadPackage(const FName: String; IsMain: Boolean): TDCPackage;
+var
+  hPkg: Integer;
+begin
+  Result :=Nil;
+  NeedPathList;
+  hPkg := AddToPathList(FName,true{SurePkg});
+  if hPkg<0 then
+    Exit;
+  Result := TDCPackage(PathList.Objects[hPkg]);
+  if Result=Nil then
+    Exit;
+  if not Result.Load(FName,IsMain) then
+    Result := Nil;
+end;
 
 initialization
 finalization

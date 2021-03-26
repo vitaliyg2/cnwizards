@@ -36,15 +36,24 @@ type
 
 { Debug info for register usage: }
 type
-  TRegVarInfoProc = function(ProcOfs: integer; hReg: THBMName; Ofs: integer): String of object;
+  TRegVarInfoProc = function(ProcOfs: integer; hReg: THBMName; Ofs,Size: integer;
+    var hDecl: integer): AnsiString of object;
 
 const
   GetRegVarInfo: TRegVarInfoProc = Nil;
 
 const
   crJmp=0;
-  crJCond=1;
-  crCall=2;
+  crRet=1;
+  crJCond=2;
+  crCall=3;
+
+type
+ {$IFNDEF XMLx86}
+  TBMOpRec = string[15];
+ {$ELSE}
+  TBMOpRec = String;
+ {$ENDIF}
 
 type
   TReadCommandProc = function: boolean;
@@ -60,8 +69,11 @@ type
     CheckCommandRefs: TCheckCommandRefsProc;
   end ;
 
+type
+  TIncPtr = PAnsiChar;
+
 var
-  CodePtr, PrevCodePtr: PChar;
+  CodePtr, PrevCodePtr: TIncPtr;
 
 var
   Disassembler: TDisassembler;
@@ -82,6 +94,7 @@ begin
 end ;
 
 end.
+
 
 
 
