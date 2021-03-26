@@ -23,6 +23,9 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source
    distribution.
 *)
+
+{$DEFINE I64}
+
 interface
 
 uses
@@ -1242,7 +1245,7 @@ var
     PutS(Prefix);
     for i:=0 to 3 do
      if (1 shl i)and Flags<>0 then
-       PutCh(Chr(Ord('1')+i));
+       PutCh(AnsiChar(Chr(Ord('1')+i)));
   end ;
 
 
