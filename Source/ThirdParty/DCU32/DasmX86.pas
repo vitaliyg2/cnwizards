@@ -27,15 +27,17 @@ freely, subject to the following restrictions:
 interface
 
 uses
-  DasmDefs,DasmUtil;
+  DasmDefs,DasmUtil,{$IFNDEF XMLx86}DasmOpT{$ELSE}x86Dasm{$ENDIF};
 
-procedure Set80x86Disassembler(I64: Boolean);
+procedure Set80x86Disassembler{$IFDEF I64}(I64: Boolean){$ENDIF};
 
 implementation
 
-procedure Set80x86Disassembler(I64: Boolean);
+procedure Set80x86Disassembler{$IFDEF I64}(I64: Boolean){$ENDIF};
 begin
+ {$IFDEF I64}
   modeI64 := I64;
+ {$ENDIF}
   SetDisassembler(ReadCommand, ShowCommand,CheckCommandRefs);
 end ;
 
