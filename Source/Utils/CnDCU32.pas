@@ -145,12 +145,11 @@ end;
 
 constructor TCnUnitUsesInfo.Create(const DcuName: string);
 begin
-  InitOut;
   FIntfUses := TStringList.Create;
   FImplUses := TStringList.Create;
   inherited Create;
   try
-    Load(DcuName, 0, False, nil, True);
+    Load(DcuName, 0, False, dcuplWin64, nil);
   except
     {$IFNDEF DELPHI2009_UP}
     raise;
@@ -216,15 +215,15 @@ begin
     if AFlag <> PRec.Flags then
       Continue;
     Lines := TStringList.Create;
-    AList.AddObject({$IFDEF UNICODE}string{$ENDIF}(PRec^.Name^), Lines);
+    AList.AddObject({$IFDEF UNICODE}string{$ENDIF}(PRec^.Name^.GetStr), Lines);
 
     Decl := PRec^.Decls;
     while Decl <> nil do
     begin
       if Decl is TImpDef then
-        Lines.Add(TImpDef(Decl).ik + ':' + {$IFDEF UNICODE}string{$ENDIF}(Decl.Name^))
+        Lines.Add(TImpDef(Decl).ik + ':' + {$IFDEF UNICODE}string{$ENDIF}(Decl.Name^.GetStr))
       else
-        Lines.Add({$IFDEF UNICODE}string{$ENDIF}(Decl.Name^));
+        Lines.Add({$IFDEF UNICODE}string{$ENDIF}(Decl.Name^.GetStr));
       Decl := Decl.Next as TBaseDef;
     end;
   end;
