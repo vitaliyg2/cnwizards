@@ -51,7 +51,6 @@ type
   TCnUnitsDependecyForm = class(TCnTranslateForm)
     chktvResult: TTreeView;
     lbl1: TLabel;
-    btnClean: TButton;
     btnCancel: TButton;
     btnHelp: TButton;
     pmList: TPopupMenu;
@@ -67,6 +66,9 @@ type
     mniSameNone: TMenuItem;
     procedure pmListPopup(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
+    procedure chktvResultAdvancedCustomDrawItem(Sender: TCustomTreeView;
+      Node: TTreeNode; State: TCustomDrawState; Stage: TCustomDrawStage;
+      var PaintImages, DefaultDraw: Boolean);
   private
     { Private declarations }
     List: TObjectList;
@@ -109,6 +111,20 @@ begin
   mniSameNone.Enabled := Bl;
 end;
 
+
+procedure TCnUnitsDependecyForm.chktvResultAdvancedCustomDrawItem(
+  Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState;
+  Stage: TCustomDrawStage; var PaintImages, DefaultDraw: Boolean);
+begin
+  inherited;
+  PaintImages := True;
+  DefaultDraw := True;
+  case Stage of
+  cdPrePaint:
+    if Node.Text.Contains('(') then
+      Sender.Canvas.Font.Color := clGrayText;
+  end;
+end;
 
 function TCnUnitsDependecyForm.GetHelpTopic: string;
 begin

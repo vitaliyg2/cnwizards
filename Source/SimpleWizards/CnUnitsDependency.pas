@@ -207,7 +207,16 @@ var
       begin
         ProcessedUnitNames.Add(aUnitName);
 
-        Node := FResultsForm.chktvResult.Items.AddChild(aParentNode, aUnitName);
+        if Assigned(aParentNode) then
+          Node := FResultsForm.chktvResult.Items.AddChild(aParentNode, aUnitName)
+        else
+        begin
+          Node := FResultsForm.chktvResult.Items.Add(nil, aUnitName);
+          Node.Expanded := True;
+        end;
+        Node.ImageIndex := 78;
+        Node.SelectedIndex := 78;
+
         for UsesInfo in UsesInfos do
         begin
           if UsesUnit(UsesInfo, aUnitName) then
@@ -218,7 +227,9 @@ var
       end
       else
       begin
-        Node := FResultsForm.chktvResult.Items.AddChild(aParentNode, aUnitName + ' (Cycle)');
+        Node := FResultsForm.chktvResult.Items.AddChild(aParentNode, aUnitName + ' (Duplicate)');
+        Node.ImageIndex := 26;
+        Node.SelectedIndex := 26;
       end;
     end;
 
@@ -247,8 +258,6 @@ var
       DcuFLP := TPath.Combine(DcuPath, aUnitName + csDcuExt);
       if not FileExists(DcuFLP) or UnitInfoExists(aUnitName) then
         Exit;
-
-      //Node := FResultsForm.chktvResult.Items.AddChild(aParentNode, aUnitName);
 
       UsesInfo := TCnUnitUsesInfo.Create(DcuFLP);
       try
@@ -295,6 +304,8 @@ var
       try
         FResultsForm.chktvResult.Items.Clear;
         ProcessUnitInfo(CurrentUnitName, nil);
+        if FResultsForm.chktvResult.Items.Count > 0 then
+          FResultsForm.chktvResult.Items.GetFirstNode.Expand(False);
         FResultsForm.Show;
       finally
         FreeAndNil(ProcessedUnitNames);
