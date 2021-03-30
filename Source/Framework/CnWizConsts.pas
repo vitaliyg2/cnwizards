@@ -1643,10 +1643,10 @@ var
 
   // UnitsDependency
   SCnUnitsDependencyMenuCaption: string = '&Units Dependency...';
-  SCnUnitsDependencyMenuHint: string = 'Build Units Dependency Reference';
   SCnUnitsDependencyName: string = 'Units Dependency';
-  SCnUnitsDependencyComment: string = 'Build Units Dependency';
-  SCnUnitsDependencyCompileFail: string = 'Compile Error. Unable to retrieve units dependency';
+  SCnUnitsDependencyComment: string = 'Displays dependency tree for currently open unit';
+  SCnUnitsDependencyMenuHint: string = SCnUnitsDependencyComment;
+  SCnUnitsDependencyCompileFail: string = 'Compile error. Unable to retrieve units dependency';
 
   // CnMatchButtonFrame
   SCnMatchButtonFrameMenuStartCaption: string = 'Match From &Start';

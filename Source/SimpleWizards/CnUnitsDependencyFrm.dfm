@@ -110,16 +110,18 @@ inherited CnUnitsDependecyForm: TCnUnitsDependecyForm
     0003C0000003C0000003C0000003C0000003C0000003C0000003C0000003C000
     0000C0000000C0000000C0000000C0000000C0000000C0000000C0000000C000
     000FC000000FC000000FC000000FC0000FFFC0000FFFC0003FFFC0003FFF}
-  ExplicitWidth = 608
-  ExplicitHeight = 515
-  PixelsPerInch = 96
+  ExplicitWidth = 610
+  ExplicitHeight = 523
+  PixelsPerInch = 120
   TextHeight = 13
   object lbl1: TLabel
     Left = 8
     Top = 8
-    Width = 60
+    Width = 322
     Height = 13
-    Caption = 'Scan Result:'
+    Caption = 
+      'Inverted dependencies tree (shows how unit is pulled into projec' +
+      't):'
   end
   object chktvResult: TTreeView
     Left = 8
@@ -134,16 +136,7 @@ inherited CnUnitsDependecyForm: TCnUnitsDependecyForm
     ReadOnly = True
     RightClickSelect = True
     TabOrder = 0
-  end
-  object btnClean: TButton
-    Left = 349
-    Top = 450
-    Width = 75
-    Height = 21
-    Anchors = [akRight, akBottom]
-    Caption = 'Clea&n'
-    Default = True
-    TabOrder = 1
+    OnAdvancedCustomDrawItem = chktvResultAdvancedCustomDrawItem
   end
   object btnCancel: TButton
     Left = 429
@@ -152,9 +145,9 @@ inherited CnUnitsDependecyForm: TCnUnitsDependecyForm
     Height = 21
     Anchors = [akRight, akBottom]
     Cancel = True
-    Caption = '&Cancel'
+    Caption = '&Close'
     ModalResult = 2
-    TabOrder = 2
+    TabOrder = 1
   end
   object btnHelp: TButton
     Left = 509
@@ -163,7 +156,7 @@ inherited CnUnitsDependecyForm: TCnUnitsDependecyForm
     Height = 21
     Anchors = [akRight, akBottom]
     Caption = '&Help'
-    TabOrder = 3
+    TabOrder = 2
     OnClick = btnHelpClick
   end
   object pmList: TPopupMenu
