@@ -566,19 +566,11 @@ end;
 
 function TCnPasStructureParser.NewToken(Lex: TmwPasLex; Source: PAnsiChar;
   CurrBlock, CurrMethod: TCnPasToken; CurrBracketLevel: Integer): TCnPasToken;
-var
-  Len: Integer;
 begin
   Result := CreatePasToken;
   Result.FTokenPos := Lex.TokenPos;
 
-  Len := Lex.TokenLength;
-  Result.FTokenLength := Len;
-  if Len > CN_TOKEN_MAX_SIZE then
-    Len := CN_TOKEN_MAX_SIZE;
-
-  Move(Lex.TokenAddr^, Result.FToken[0], Len);
-  Result.FToken[Len] := #0;
+  Result.FToken := Lex.Token;
 
   Result.FLineNumber := Lex.LineNumber;
   Result.FCharIndex := CalcCharIndex(Lex, Source);

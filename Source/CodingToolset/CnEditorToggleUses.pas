@@ -88,8 +88,10 @@ implementation
 
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
+{$IFDEF DEBUG}
 uses
-  {$IFDEF DEBUG} CnDebug {$ENDIF};
+  CnDebug;
+{$ENDIF}
 
 const
   CnToggleUsesBookmarkID = 18;

@@ -1825,7 +1825,7 @@ var
   SCnUnitsDependencyMenuCaption: string = '&Units Dependency...';
   SCnUnitsDependencyName: string = 'Units Dependency';
   SCnUnitsDependencyComment: string = 'Displays dependency tree for currently open unit';
-  SCnUnitsDependencyMenuHint: string = SCnUnitsDependencyComment;
+  SCnUnitsDependencyMenuHint: string = 'Displays dependency tree for currently open unit';
   SCnUnitsDependencyCompileFail: string = 'Compile error. Unable to retrieve units dependency';
 
   // CnAICoderWizard

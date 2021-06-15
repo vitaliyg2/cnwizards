@@ -44,8 +44,9 @@ interface
 uses
   Messages, SysUtils,
   Windows, Classes, Graphics, Controls, Forms, Dialogs,
-  Variants, Contnrs, StdCtrls, IniFiles, ToolsAPI, CnWizUtils, CnConsts, CnCommon, CnEditorWizard,
-  RegExpr, CnWizConsts, CnEditorCodeTool, CnWizXmlUtils, CnWizOptions;
+  Variants, Contnrs, StdCtrls, IniFiles, ToolsAPI, CnWizUtils, CnConsts, CnCommon,
+  RegExpr, CnWizConsts, CnEditorCodeTool, CnWizXmlUtils, CnWizOptions,
+  CnCodingToolsetWizard;
 
 type
 
@@ -56,7 +57,7 @@ type
     function ProcessText(const Text: string): string; override;
     function GetStyle: TCnCodeToolStyle; override;
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
     procedure GetEditorInfo(var Name, Author, Email: string); override;
@@ -99,7 +100,7 @@ type
 
 { TCnEditorSortUsesList }
 
-constructor TCnEditorSortUsesList.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorSortUsesList.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
   ValidInSource := False;

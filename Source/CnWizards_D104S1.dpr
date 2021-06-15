@@ -239,6 +239,7 @@ uses
   CnImageProviderLocalCache in 'Utils\CnImageProviderLocalCache.pas',
   CnFormatterIntf in 'CodeFormatter\CnFormatterIntf.pas',
   CnCodeFormatterWizard in 'CodeFormatter\CnCodeFormatterWizard.pas' {CnCodeFormatterForm},
+  CnProjectOpenFileFrm in 'ProjectExtWizard\CnProjectOpenFileFrm.pas' {CnProjectOpenFileForm},
   CnAICoderWizard in 'AICoder\CnAICoderWizard.pas' {CnAICoderConfigForm},
   CnAICoderConfig in 'AICoder\CnAICoderConfig.pas',
   CnAICoderNetClient in 'AICoder\CnAICoderNetClient.pas',
