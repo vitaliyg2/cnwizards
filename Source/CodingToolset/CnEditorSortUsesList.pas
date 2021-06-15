@@ -44,8 +44,9 @@ interface
 uses
   Messages, SysUtils,
   Windows, Classes, Graphics, Controls, Forms, Dialogs,
-  Variants, Contnrs, StdCtrls, IniFiles, ToolsAPI, CnWizUtils, CnConsts, CnCommon, CnEditorWizard,
-  RegExpr, CnWizConsts, CnEditorCodeTool, CnWizXmlUtils, CnWizOptions;
+  Variants, Contnrs, StdCtrls, IniFiles, ToolsAPI, CnWizUtils, CnConsts, CnCommon,
+  RegExpr, CnWizConsts, CnEditorCodeTool, CnWizXmlUtils, CnWizOptions,
+  CnEditorToolsetWizard;
 
 type
 
