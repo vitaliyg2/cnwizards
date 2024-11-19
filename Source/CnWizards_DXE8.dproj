@@ -255,7 +255,7 @@
         <DCCReference Include="CodingToolset\CnEditorFontZoom.pas"/>
         <DCCReference Include="CodingToolset\CnEditorDuplicateUnit.pas"/>
         <DCCReference Include="CodingToolset\CnEditorExtractString.pas">
-                <Form>CnExtractStringForm</Form>
+            <Form>CnExtractStringForm</Form>
         </DCCReference>
         <DCCReference Include="CodingToolset\CnEditorExtSelect.pas"/>
         <DCCReference Include="SimpleWizards\CnMsdnWizard.pas">
@@ -354,8 +354,8 @@
         <DCCReference Include="ProjectExtWizard\CnProjectListUsedFrm.pas">
             <Form>CnProjectListUsedForm</Form>
         </DCCReference>
-        <DCCReference Include="VclToFmx\CnVclToFmxIntf.pas"/>
         <DCCReference Include="Utils\CnWizDfmParser.pas"/>
+        <DCCReference Include="VclToFmx\CnVclToFmxIntf.pas"/>
         <DCCReference Include="SimpleWizards\CnCommentCropper.pas">
             <Form>CnCommentCropForm</Form>
         </DCCReference>
@@ -521,6 +521,9 @@
             <Form>CnImportDirForm</Form>
         </DCCReference>
         <DCCReference Include="Utils\CnDCU32.pas"/>
+        <DCCReference Include="CodingToolset\CnEditorSortUsesList.pas"/>
+        <DCCReference Include="SimpleWizards\CnUnitsDependency.pas"/>
+        <DCCReference Include="SimpleWizards\CnUnitsDependencyFrm.pas"/>
         <DCCReference Include="UsesWizard\CnUsesToolsWizard.pas">
             <Form>CnUsesCleanerForm</Form>
         </DCCReference>
@@ -528,10 +531,10 @@
             <Form>CnUsesCleanResultForm</Form>
         </DCCReference>
         <DCCReference Include="UsesWizard\CnUsesInitTreeFrm.pas">
-				    <Form>CnUsesInitTreeForm</Form>
+            <Form>CnUsesInitTreeForm</Form>
         </DCCReference>
         <DCCReference Include="UsesWizard\CnUsesIdentFrm.pas">
-				    <Form>CnUsesIdentForm</Form>
+            <Form>CnUsesIdentForm</Form>
         </DCCReference>
         <DCCReference Include="IdeEnhancements\CnIdeEnhanceMenu.pas"/>
         <DCCReference Include="SimpleWizards\CnIdeBRWizard.pas"/>
@@ -551,10 +554,13 @@
         <DCCReference Include="Utils\CnImageProviderIconFinder.pas"/>
         <DCCReference Include="Utils\CnImageProviderFindIcons.pas"/>
         <DCCReference Include="Utils\CnImageProviderLocalCache.pas"/>
-        <DCCReference Include="EditorWizard\CnEditorSortUsesList.pas"/>
         <DCCReference Include="CodeFormatter\CnFormatterIntf.pas"/>
         <DCCReference Include="CodeFormatter\CnCodeFormatterWizard.pas">
             <Form>CnCodeFormatterForm</Form>
+        </DCCReference>
+        <DCCReference Include="ProjectExtWizard\CnProjectOpenFileFrm.pas">
+            <Form>CnProjectOpenFileForm</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="AICoder\CnAICoderWizard.pas">
             <Form>CnAICoderConfigForm</Form>
@@ -569,10 +575,6 @@
         <DCCReference Include="AICoder\CnFrmAICoderOption.pas">
             <Form>CnAICoderOptionFrame</Form>
             <DesignClass>TFrame</DesignClass>
-        </DCCReference>
-        <DCCReference Include="SimpleWizards\CnUnitsDependency.pas"/>
-        <DCCReference Include="SimpleWizards\CnUnitsDependencyFrm.pas">
-            <Form>CnUnitsDependecyForm</Form>
         </DCCReference>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
