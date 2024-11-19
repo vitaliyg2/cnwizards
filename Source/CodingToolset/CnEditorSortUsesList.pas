@@ -45,14 +45,14 @@ uses
   Messages, SysUtils,
   Windows, Classes, Graphics, Controls, Forms, Dialogs,
   Variants, Contnrs, StdCtrls, IniFiles, ToolsAPI, CnWizUtils, CnConsts, CnCommon,
-  RegExpr, CnWizConsts, CnEditorCodeTool, CnWizXmlUtils, CnWizOptions,
+  RegExpr, CnWizConsts, CnSelectionCodeTool, CnWizXmlUtils, CnWizOptions,
   CnCodingToolsetWizard;
 
 type
 
 { TCnEditorSortUsesList }
 
-  TCnEditorSortUsesList = class(TCnEditorCodeTool)
+  TCnEditorSortUsesList = class(TCnSelectionCodeTool)
   protected
     function ProcessText(const Text: string): string; override;
     function GetStyle: TCnCodeToolStyle; override;
@@ -60,7 +60,7 @@ type
     constructor Create(AOwner: TCnCodingToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
   end;
 
 {$ENDIF CNWIZARDS_CNEDITORWIZARD}
@@ -139,7 +139,7 @@ begin
   Result := SCnEditorSortUsesListMenuHint;
 end;
 
-procedure TCnEditorSortUsesList.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorSortUsesList.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorSortUsesListName;
   Author := 'github.com/vitaliyg2';
