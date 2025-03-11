@@ -3282,12 +3282,12 @@
   {$DEFINE IDE_HAS_MEMORY_VISUALIZAER}  // Alexandria 11 has Memory Visualizer for Debug
   {$DEFINE TSTRINGS_SETTEXTSTR_CANNULL} // Alexandria 11 TStrings.SetTextStr Ignore #0 Terminated Char
   {$DEFINE MEMORYSTREAM_CAPACITY_NATIVEINT}  // Alexandria 11 TMemoryStream Capacity is NativeInt instead of Longint
+  {$DEFINE IDE_EDITOR_CUSTOM_COLUMN}    // Sydney 10.4 或以上编辑器左侧 Gutter 支持自定义
 {$ENDIF}
 
 {$IFDEF DELPHI104_SYDNEY_UP}
   {$DEFINE IDE_SUPPORT_LSP}             // Sydney 10.4 或以上支持 LSP 语言服务器
   {$DEFINE IDE_HAS_ERRORINSIGHT}        // Sydney 10.4.2 或以上支持编辑器侧栏的 ErrorInsight
-  {$DEFINE IDE_EDITOR_CUSTOM_COLUMN}    // Sydney 10.4 或以上编辑器左侧 Gutter 支持自定义，但没接口操纵，约等于无用
   {$DEFINE IDE_SWITCH_BUG}              // Sydney 10.4.2 存在打开文件时莫名其妙切换到后台的 Bug
 {$ENDIF}
 
