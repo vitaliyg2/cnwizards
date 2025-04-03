@@ -1696,7 +1696,7 @@ var
   Decl: TCnIdeTokenString;
   S: string;
   Vis: TTokenKind;
-  ProcStr: TCnIdeTokenString;
+  ClassStr, ProcStr: TCnIdeTokenString;
 begin
   Obj := GetToolBarObjFromEditControl(CnOtaGetCurrentEditControl);
   if Obj = nil then Exit;
