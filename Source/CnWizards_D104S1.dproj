@@ -521,8 +521,8 @@
         </DCCReference>
         <DCCReference Include="Utils\CnDCU32.pas"/>
         <DCCReference Include="CodingToolset\CnEditorSortUsesList.pas"/>
-        <DCCReference Include="SimpleWizards\CnUnitsDependency.pas"/>
-        <DCCReference Include="SimpleWizards\CnUnitsDependencyFrm.pas"/>
+        <DCCReference Include="SimpleWizard\CnUnitsDependency.pas"/>
+        <DCCReference Include="SimpleWizard\CnUnitsDependencyFrm.pas"/>
         <DCCReference Include="UsesWizard\CnUsesToolsWizard.pas">
             <Form>CnUsesCleanerForm</Form>
         </DCCReference>
@@ -557,6 +557,10 @@
         <DCCReference Include="CodeFormatter\CnCodeFormatterWizard.pas">
             <Form>CnCodeFormatterForm</Form>
         </DCCReference>
+        <DCCReference Include="ProjectExtWizard\CnProjectOpenFileFrm.pas">
+            <Form>CnProjectOpenFileForm</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <DCCReference Include="AICoder\CnAICoderWizard.pas">
             <Form>CnAICoderConfigForm</Form>
         </DCCReference>
@@ -570,10 +574,6 @@
         <DCCReference Include="AICoder\CnFrmAICoderOption.pas">
             <Form>CnAICoderOptionFrame</Form>
             <DesignClass>TFrame</DesignClass>
-        </DCCReference>
-        <DCCReference Include="ProjectExtWizard\CnProjectOpenFileFrm.pas">
-            <Form>CnProjectOpenFileForm</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>

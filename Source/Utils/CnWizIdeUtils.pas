@@ -2379,9 +2379,9 @@ var
   i: Integer;
   Path: string;
 begin
-  AddProjectPath(Project, Paths, 'BrowsingPath');
-  AddProjectPath(Project, Paths, 'SrcDir');
-  AddProjectPath(Project, Paths, 'IncludePath');
+  AddProjectPath(Project, Paths, pptUnit);
+  AddProjectPath(Project, Paths, pptSrc);
+  AddProjectPath(Project, Paths, pptInclude);
 
   Path := _CnExtractFilePath(Project.FileName);
   if Paths.IndexOf(Path) < 0 then
