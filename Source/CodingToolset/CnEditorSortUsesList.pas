@@ -214,7 +214,7 @@ begin
       begin
         Name := Group.FoundUnitNames[i];
 
-        AvailableLength := 80 - 2 - Length(ResultLine);
+        AvailableLength := 70 - 2 - Length(ResultLine);
         if (AvailableLength - Length(Name) >= -8) and
           (AvailableLength >= Round(Length(Name)*0.65))
         then
