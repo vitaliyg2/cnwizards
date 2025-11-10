@@ -320,7 +320,7 @@ end;
 
 function TUnitGroup.ProcessUnitMatch(const aUnitName: string): Boolean;
 var
-  UnitOrderIndex, i, FoundUnitIndex: Integer;
+  UnitOrderIndex, i, LInListOrderIndex: Integer;
   GroupUnitName: string;
 begin
   UnitOrderIndex := -1;
@@ -367,16 +367,26 @@ begin
 
   if Result then
   begin
-    if (UnitOrderIndex <> -1) then
-      for i := 0 to FFoundUnitNames.Count - 1 do
+    for i := 0 to FFoundUnitNames.Count - 1 do
+    begin
+      LInListOrderIndex := Integer(FFoundUnitNames.Objects[i]);
+      if( (LInListOrderIndex = -1)
+          and (UnitOrderIndex = -1)
+          and (aUnitName > FFoundUnitNames[i])
+        )
+        or
+        ( (UnitOrderIndex <> -1)
+          and
+          ( (LInListOrderIndex > UnitOrderIndex)
+            or (LInListOrderIndex = -1)
+          )
+        )
+      then
       begin
-        FoundUnitIndex := Integer(FFoundUnitNames.Objects[i]);
-        if (FoundUnitIndex = -1) or ((FoundUnitIndex > UnitOrderIndex)) then
-        begin
-          FFoundUnitNames.InsertObject(i, aUnitName, TObject(UnitOrderIndex));
-          Exit;
-        end;
+        FFoundUnitNames.InsertObject(i, aUnitName, TObject(UnitOrderIndex));
+        Exit;
       end;
+    end;
 
     FFoundUnitNames.AddObject(aUnitName, TObject(UnitOrderIndex));
   end;

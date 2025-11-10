@@ -603,4 +603,10 @@ Vcl.XPActnCtrls
 Vcl.XPMan
 Vcl.XPStyleActnCtrls  
   </group>
+  <group name="Data" pattern="Data\..*" scope="*"/>
+  <group name="FireDAC" pattern="FireDAC\..*" scope="*"/>
+  <group name="FMX.RS" pattern="FMX\.RS\..*" scope="*"/>
+  <group name="FMX" pattern="FMX\..*" scope="*"/>
+  <group name="PBLib" pattern="PB.*|FMX\.PB.*" scope="*"/>
+  
 </settings>
