@@ -331,9 +331,9 @@ begin
   begin
     UnitOrderIndex := FUnitNames.IndexOf(aUnitName);
     Result := (UnitOrderIndex <> -1);
-    if Result then
-      Exit;
+  end;
 
+  if (not Result) then
     if (FUnitScopeNames.Count = 1) and (FUnitScopeNames[0]= '*') then
     begin
       for i := 0 to FUnitNames.Count - 1 do
@@ -359,7 +359,6 @@ begin
           Break;
       end;
     end;
-  end;
 
   if (not Result) then
   begin
