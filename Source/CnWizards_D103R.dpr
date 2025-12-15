@@ -234,6 +234,7 @@ uses
   CnImageProviderIconFinder in 'Utils\CnImageProviderIconFinder.pas',
   CnImageProviderFindIcons in 'Utils\CnImageProviderFindIcons.pas',
   CnImageProviderLocalCache in 'Utils\CnImageProviderLocalCache.pas',
+  CnEditorSortUsesList in 'CodingToolset\CnEditorSortUsesList.pas',
   CnFormatterIntf in 'CodeFormatter\CnFormatterIntf.pas',
   CnCodeFormatterWizard in 'CodeFormatter\CnCodeFormatterWizard.pas' {CnCodeFormatterForm},
   CnAICoderWizard in 'AICoder\CnAICoderWizard.pas' {CnAICoderConfigForm},
